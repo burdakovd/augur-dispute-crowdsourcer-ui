@@ -1,0 +1,13 @@
+[ignore]
+<PROJECT_ROOT>/coverage/.*
+
+[include]
+
+[libs]
+flow-typed
+
+[lints]
+
+[options]
+
+[strict]

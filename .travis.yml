@@ -4,5 +4,6 @@ node_js:
   - "8.12"
 
 script:
+  - yarn flow
   - yarn test --coverage
   - yarn build

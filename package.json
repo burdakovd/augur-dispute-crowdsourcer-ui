@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "dependencies": {
+    "nullthrows": "^1.1.0",
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
     "react-scripts": "2.1.1"
@@ -11,7 +12,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "yarn eslint src"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -23,6 +25,18 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "flow-bin": "^0.85.0"
+    "eslint": "5.6.0",
+    "eslint-config-prettier": "^3.1.0",
+    "eslint-config-react-app": "^3.0.5",
+    "eslint-plugin-flow-header": "^0.2.0",
+    "eslint-plugin-flowtype": "^3.2.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-prettier": "^3.0.0",
+    "eslint-plugin-react": "^7.11.1",
+    "eslint-watch": "^4.0.2",
+    "flow-bin": "^0.85.0",
+    "flow-typed": "^2.5.1",
+    "prettier": "^1.14.3"
   }
 }

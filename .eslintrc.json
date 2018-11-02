@@ -1,0 +1,15 @@
+{
+  "extends": ["react-app", "plugin:flowtype/recommended", "prettier"],
+  "env": {
+    "browser": true,
+    "es6": true,
+    "node": true,
+    "jest": true
+  },
+  "plugins": ["flow-header", "eslint-plugin-flowtype", "prettier"],
+  "rules": {
+    "flow-header/flow-header": 2,
+    "prettier/prettier": "error",
+    "flowtype/newline-after-flow-annotation": [2, "always"]
+  }
+}

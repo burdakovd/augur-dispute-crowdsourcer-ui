@@ -5,5 +5,6 @@ node_js:
 
 script:
   - yarn flow
+  - yarn lint
   - yarn test --coverage
   - yarn build

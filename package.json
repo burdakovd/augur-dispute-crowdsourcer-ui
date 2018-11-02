@@ -37,6 +37,7 @@
     "eslint-watch": "^4.0.2",
     "flow-bin": "^0.85.0",
     "flow-typed": "^2.5.1",
-    "prettier": "^1.14.3"
+    "prettier": "^1.14.3",
+    "react-bootstrap": "^0.32.4"
   }
 }

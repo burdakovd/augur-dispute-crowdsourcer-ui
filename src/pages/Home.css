@@ -1,0 +1,14 @@
+.Home-search-page {
+  display: flex;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+}
+
+.Home-search-page form {
+  margin: 1em;
+}
+
+.Home-search-page input[type="text"] {
+  width: 50em;
+  text-align: center;
+}

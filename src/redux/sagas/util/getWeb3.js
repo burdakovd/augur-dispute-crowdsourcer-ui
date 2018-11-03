@@ -36,7 +36,7 @@ async function getWeb3(): Promise<Web3> {
   } else {
     console.log("No web3? You should consider trying MetaMask!");
     cache = new Web3(
-      new Web3.providers.HttpProvider("https://gethnode.com/http")
+      new Web3.providers.HttpProvider("https://mainnet.infura.io/augur")
     );
   }
 

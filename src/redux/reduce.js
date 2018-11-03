@@ -2,6 +2,7 @@
 
 import type { State } from "./state";
 import type { Action } from "./actions/types";
+import { Map as ImmMap } from "immutable";
 import getInitialState from "./state";
 
 function reduce(state: State = getInitialState(), action: Action): State {
@@ -14,6 +15,22 @@ function reduce(state: State = getInitialState(), action: Action): State {
     return {
       ...state,
       network: action.id
+    };
+  } else if (action.type === "SEARCH_RESULTS") {
+    const { network, query, results } = action;
+
+    const mapUpdate = (m, k, updater) => m.set(k, updater(m.get(k)));
+
+    return {
+      ...state,
+      searchResults: mapUpdate(state.searchResults, network, m =>
+        mapUpdate(m || ImmMap(), query, () => results)
+      )
+    };
+  } else if (action.type === "SEARCH_RESULTS_PROGRESS") {
+    return {
+      ...state,
+      searchResultsProgress: action.progress
     };
   }
 

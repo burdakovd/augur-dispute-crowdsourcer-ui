@@ -15,6 +15,8 @@ import "./Home.css";
 type SearchParams = {|
   query: string,
   network: ?string,
+  progress: number,
+  results: ?SearchResults,
   onQueryUpdated: string => void
 |};
 
@@ -28,8 +30,8 @@ class SearchPage extends Component<SearchParams> {
           {this.props.network == null
             ? "Connecting to Ethereum network..."
             : `Connected to Ethereum network: ${ImmMap(networkIDtoName).get(
-                nullthrows(this.props.network),
-                nullthrows(this.props.network)
+                `${this.props.network}`,
+                this.props.network
               )}`}
         </div>
         <form>
@@ -45,6 +47,7 @@ class SearchPage extends Component<SearchParams> {
             />
           </FormGroup>
         </form>
+        <div>{`${this.props.results || ".".repeat(this.props.progress)}`}</div>
       </div>
     );
   }
@@ -56,7 +59,9 @@ class SearchPage extends Component<SearchParams> {
 
 const mapStateToProps: State => * = (state: State) => ({
   query: state.query,
-  network: state.network
+  network: state.network,
+  results: state.searchResults.get(state.network, ImmMap()).get(state.query),
+  progress: state.searchResultsProgress
 });
 
 const mapDispatchToProps: Dispatch => * = (dispatch: Dispatch) => {

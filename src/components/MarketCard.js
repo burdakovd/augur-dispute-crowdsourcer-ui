@@ -12,9 +12,24 @@ const MarketCard = ({ id }: { id: string }) => {
           <MarketName id={id} />
         </Panel.Title>
       </Panel.Heading>
-      <Panel.Body>{id}</Panel.Body>
+      <Panel.Body>
+        Market ID: {id}, <PredictionsGlobalLink id={id} />,{" "}
+        <ReportersChatLink id={id} />
+      </Panel.Body>
     </Panel>
   );
+};
+
+const PredictionsGlobalLink = ({ id }) => {
+  return (
+    <a href={`https://predictions.global/augur-markets/${id}`}>
+      Predictions.Global
+    </a>
+  );
+};
+
+const ReportersChatLink = ({ id }) => {
+  return <a href={`https://reporters.chat/markets/${id}`}>Reporters.Chat</a>;
 };
 
 export default MarketCard;

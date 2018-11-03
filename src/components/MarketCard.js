@@ -67,7 +67,7 @@ const MarketCard = ({ id, info }: { id: string, info: * }) => {
 const DisputeRounds = ({ info }) => {
   return (
     <div className="dispute-rounds">
-      {ImmRange(0, info.numParticipants)
+      {ImmRange(0, info.numParticipants + 2)
         .map(i => (
           <Button bsStyle="success" key={i}>
             {i}

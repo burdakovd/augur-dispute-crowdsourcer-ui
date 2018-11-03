@@ -9,6 +9,7 @@ import { Map as ImmMap } from "immutable";
 import { connect } from "react-redux";
 import type { State } from "../redux/state";
 import type { Dispatch, SearchResults } from "../redux/actions/types";
+import MarketCard from "../components/MarketCard";
 import networkIDtoName from "../networks";
 import "./Home.css";
 
@@ -47,7 +48,7 @@ class SearchPage extends Component<SearchParams> {
             />
           </FormGroup>
         </form>
-        <div>
+        <div className="Home-search-results">
           {this.props.results ? (
             this.props.results.size ? (
               <Markets markets={this.props.results} />
@@ -70,13 +71,9 @@ class SearchPage extends Component<SearchParams> {
 const Markets = ({ markets }) => {
   return (
     <div>
-      {markets.map((id, index) => <Market key={index} id={id} />).toArray()}
+      {markets.map((id, index) => <MarketCard key={index} id={id} />).toArray()}
     </div>
   );
-};
-
-const Market = ({ id }) => {
-  return <div>{id}</div>;
 };
 
 const mapStateToProps: State => * = (state: State) => ({

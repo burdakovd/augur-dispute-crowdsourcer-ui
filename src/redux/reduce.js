@@ -30,6 +30,14 @@ function reduce(state: State = getInitialState(), action: Action): State {
       ...state,
       searchResultsProgress: action.progress
     };
+  } else if (action.type === "MARKET_INFO_FETCHED") {
+    const { network, id, info } = action;
+    return {
+      ...state,
+      marketInfo: state.marketInfo.update(network, m =>
+        (m || ImmMap()).update(id, _ => info)
+      )
+    };
   }
 
   return state;

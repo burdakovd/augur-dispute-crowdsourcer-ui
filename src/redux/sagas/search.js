@@ -10,8 +10,8 @@ import {
   select,
   cancel
 } from "redux-saga/effects";
-import getAugur from "./getAugur";
-import getWeb3 from "./getWeb3";
+import getAugur from "./util/getAugur";
+import getWeb3 from "./util/getWeb3";
 
 function* showSearchProgress(): * {
   for (var i = 0; ; ++i) {
@@ -121,7 +121,7 @@ function* handleSearchQuery(): * {
         type: "SEARCH_RESULTS",
         network,
         query,
-        results: markets.take(20)
+        results: markets.take(10)
       });
     } catch (Error) {
       if (web3.utils.isAddress(query)) {

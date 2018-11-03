@@ -20,19 +20,27 @@ function waitForDocumentLoad(): Promise<void> {
   });
 }
 
+var cache: ?Web3 = null;
+
 async function getWeb3(): Promise<Web3> {
+  if (cache !== null) {
+    return cache;
+  }
+
   await waitForDocumentLoad();
 
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
   if (typeof window.web3 !== "undefined") {
     // Use Mist/MetaMask's provider
-    return new Web3(window.web3.currentProvider);
+    cache = new Web3(window.web3.currentProvider);
   } else {
     console.log("No web3? You should consider trying MetaMask!");
-    return new Web3(
+    cache = new Web3(
       new Web3.providers.HttpProvider("https://gethnode.com/http")
     );
   }
+
+  return cache;
 }
 
 export default getWeb3;

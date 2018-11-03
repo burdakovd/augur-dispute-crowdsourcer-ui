@@ -32,3 +32,10 @@
 .invalid-outcome {
   color: #ffaaaa;
 }
+
+.dispute-rounds button {
+  margin: 0.25em;
+  width: 2.5em;
+  height: 2.5em;
+  padding: 0px;
+}

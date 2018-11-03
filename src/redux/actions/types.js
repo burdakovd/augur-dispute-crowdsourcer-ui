@@ -6,7 +6,8 @@ export type SearchResults = ImmList<string>;
 export type MarketInfo = {|
   name: string,
   marketType: string,
-  outcomes: Array<string>
+  outcomes: Array<string>,
+  numParticipants: number
 |};
 
 export type Action =

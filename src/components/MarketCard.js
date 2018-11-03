@@ -1,8 +1,10 @@
 // @flow
 
 import type { State } from "../redux/state";
-import { Map as ImmMap, List as ImmList } from "immutable";
+import { Map as ImmMap, List as ImmList, Range as ImmRange } from "immutable";
 import React from "react";
+import ButtonGroup from "react-bootstrap/lib/ButtonGroup";
+import Button from "react-bootstrap/lib/Button";
 import Panel from "react-bootstrap/lib/Panel";
 import Table from "react-bootstrap/lib/Table";
 import { connect } from "react-redux";
@@ -46,7 +48,9 @@ const MarketCard = ({ id, info }: { id: string, info: * }) => {
                       {outcome.name}
                     </span>
                   </td>
-                  <td>TBD</td>
+                  <td>
+                    <DisputeRounds info={info} />
+                  </td>
                 </tr>
               ))
           ) : (
@@ -57,6 +61,20 @@ const MarketCard = ({ id, info }: { id: string, info: * }) => {
         </tbody>
       </Table>
     </Panel>
+  );
+};
+
+const DisputeRounds = ({ info }) => {
+  return (
+    <div className="dispute-rounds">
+      {ImmRange(0, info.numParticipants)
+        .map(i => (
+          <Button bsStyle="success" key={i}>
+            {i}
+          </Button>
+        ))
+        .toArray()}
+    </div>
   );
 };
 

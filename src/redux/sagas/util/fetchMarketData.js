@@ -17,12 +17,16 @@ async function fetchMarketData(
   const [
     // eslint-disable-next-line no-unused-vars
     _,
-    marketCreationInfo
+    marketCreationInfo,
+    numParticipants
   ] = await Promise.all([
     // We need to ensure that market belongs to
     // trusted universe.
     ensureMarketIsLegitAndIsFromTrustedUniverse(web3, marketID),
-    fetchMarketCreationInfo(web3, marketID, creationBlock)
+    fetchMarketCreationInfo(web3, marketID, creationBlock),
+    new web3.eth.Contract(augurABI.Market, marketID).methods
+      .getNumParticipants()
+      .call()
   ]);
 
   return {
@@ -32,7 +36,8 @@ async function fetchMarketData(
       BINARY: () => ["YES", "NO"],
       CATEGORICAL: () => marketCreationInfo.outcomes,
       SCALAR: () => ["(?0 scalar)", "(?1 scalar)"]
-    }[marketCreationInfo.marketType]()
+    }[marketCreationInfo.marketType](),
+    numParticipants: numParticipants
   };
 }
 

@@ -47,13 +47,17 @@ class SearchPage extends Component<SearchParams> {
             />
           </FormGroup>
         </form>
-        <div>{`${
-          this.props.results
-            ? this.props.results.size
-              ? this.props.results.toString()
-              : "No markets found for the query"
-            : ".".repeat(this.props.progress)
-        }`}</div>
+        <div>
+          {this.props.results ? (
+            this.props.results.size ? (
+              <Markets markets={this.props.results} />
+            ) : (
+              "No markets found for the query"
+            )
+          ) : (
+            ".".repeat(this.props.progress)
+          )}
+        </div>
       </div>
     );
   }
@@ -62,6 +66,18 @@ class SearchPage extends Component<SearchParams> {
     (ReactDOM.findDOMNode(nullthrows(this.searchInput)): any).focus();
   }
 }
+
+const Markets = ({ markets }) => {
+  return (
+    <div>
+      {markets.map((id, index) => <Market key={index} id={id} />).toArray()}
+    </div>
+  );
+};
+
+const Market = ({ id }) => {
+  return <div>{id}</div>;
+};
 
 const mapStateToProps: State => * = (state: State) => ({
   query: state.query,

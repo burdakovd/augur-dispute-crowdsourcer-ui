@@ -121,7 +121,7 @@ function* handleSearchQuery(): * {
         type: "SEARCH_RESULTS",
         network,
         query,
-        results: markets
+        results: markets.take(20)
       });
     } catch (Error) {
       if (web3.utils.isAddress(query)) {

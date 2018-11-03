@@ -121,10 +121,7 @@ async function fetchMarketCreationInfo(
   marketID: string,
   creationBlock: number
 ): Promise<*> {
-  const [receipts, addresses] = await Promise.all([
-    getTransactionReceiptsForBlock(web3, creationBlock),
-    getAddressesForNetworkOfWeb3(web3)
-  ]);
+  const addresses = await getAddressesForNetworkOfWeb3(web3);
 
   const marketCreatedEventInputsABI = onlyx(
     augurABI.Augur.filter(
@@ -132,27 +129,37 @@ async function fetchMarketCreationInfo(
     )
   ).inputs;
 
+  const MarketCreatedEventSignature =
+    "0xb2e65de73007eef46316e4f18ab1f301b4d0e31aa56733387b469612f90894df";
+
   // Here we take externally-provided transactions as a proof
   // of how market was created. We need to verify:
   // 1. Trusted Augur contract logged "MarketCreated" event in tx
   // 2. Event is about this market
-  const logs = ImmList(receipts)
-    .flatMap(receipt => receipt.logs)
-    .filter(
-      ({ address }) => address.toLowerCase() === addresses.Augur.toLowerCase()
+  const event = await web3.eth
+    .getPastLogs({
+      fromBlock: web3.utils.toHex(creationBlock),
+      toBlock: web3.utils.toHex(creationBlock),
+      address: addresses.Augur,
+      topics: [MarketCreatedEventSignature]
+    })
+    .then(logs =>
+      logs
+        .filter(
+          ({ address }) =>
+            address.toLowerCase() === addresses.Augur.toLowerCase()
+        )
+        .filter(({ topics }) => topics[0] === MarketCreatedEventSignature)
+        .map(({ data, topics }) =>
+          web3.eth.abi.decodeLog(
+            marketCreatedEventInputsABI,
+            data,
+            topics.slice(1)
+          )
+        )
+        .filter(event => event.market.toLowerCase() === marketID.toLowerCase())
     )
-    .filter(
-      ({ topics }) =>
-        topics[0] ===
-        "0xb2e65de73007eef46316e4f18ab1f301b4d0e31aa56733387b469612f90894df"
-    )
-    .map(({ data, topics }) =>
-      web3.eth.abi.decodeLog(marketCreatedEventInputsABI, data, topics.slice(1))
-    )
-    .filter(event => event.market.toLowerCase() === marketID.toLowerCase())
-    .toArray();
-
-  const event = onlyx(logs);
+    .then(onlyx);
 
   return {
     description: event.description,
@@ -161,24 +168,6 @@ async function fetchMarketCreationInfo(
       abiDecodeShortStringAsInt256(o).toString()
     )
   };
-}
-
-async function getTransactionReceiptsForBlock(
-  web3: Web3,
-  block: number
-): Promise<Array<*>> {
-  const numTransactions = await web3.eth.getBlockTransactionCount(block);
-  return await Promise.all(
-    ImmRange(0, numTransactions)
-      .map(async index => {
-        const transaction = await web3.eth.getTransactionFromBlock(
-          block,
-          index
-        );
-        return await web3.eth.getTransactionReceipt(transaction.hash);
-      })
-      .toArray()
-  );
 }
 
 async function getAddressesForNetworkOfWeb3(web3: Web3): Promise<Addresses> {

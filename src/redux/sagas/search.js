@@ -10,8 +10,8 @@ import {
   select,
   cancel
 } from "redux-saga/effects";
+import Web3 from "web3";
 import getAugur from "./util/getAugur";
-import getWeb3 from "./util/getWeb3";
 
 function* showSearchProgress(): * {
   for (var i = 0; ; ++i) {
@@ -30,7 +30,7 @@ function* handleSearchQuery(): * {
   });
 
   // wait before search in case the user is still typing
-  yield call(delay, 200);
+  yield call(delay, 400);
 
   const query = yield select(state => state.query);
   const network = yield select(state => state.network);
@@ -47,8 +47,6 @@ function* handleSearchQuery(): * {
   const progressReporter = yield fork(showSearchProgress);
 
   try {
-    const web3 = yield call(getWeb3);
-
     const extraMarkets = yield call(async () => {
       try {
         const augur = await getAugur(network);
@@ -115,14 +113,18 @@ function* handleSearchQuery(): * {
       return merged;
     };
 
+    // setting the limit low to make fetching data for each result
+    // less stressful
+    const LIMIT = 3;
+
     yield put({
       type: "SEARCH_RESULTS",
       network,
       query,
       results: merge([
-        web3.utils.isAddress(query) ? [query] : [],
+        Web3.utils.isAddress(query) ? [query] : [],
         ...extraMarkets
-      ]).take(10)
+      ]).take(LIMIT)
     });
   } finally {
     yield cancel(progressReporter);

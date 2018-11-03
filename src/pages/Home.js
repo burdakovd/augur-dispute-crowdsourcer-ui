@@ -74,6 +74,7 @@ const Markets = ({ markets }) => {
       {markets.map((id, index) => <MarketCard key={index} id={id} />).toArray()}
     </div>
   );
+  // TODO: could fetch more on scrolling
 };
 
 const mapStateToProps: State => * = (state: State) => ({

@@ -1,5 +1,6 @@
 // @flow
 
+import nullthrows from "nullthrows";
 import Web3 from "web3";
 
 function waitForDocumentLoad(): Promise<void> {
@@ -20,11 +21,30 @@ function waitForDocumentLoad(): Promise<void> {
   });
 }
 
-var cache: ?Web3 = null;
+var publicCache = {};
+var personalCache: ?Web3 = null;
 
-async function getWeb3(): Promise<Web3> {
-  if (cache !== null) {
-    return cache;
+async function getPublicWeb3(network: number): Promise<Web3> {
+  if (publicCache[network] != null) {
+    return publicCache[network];
+  }
+
+  publicCache[network] = new Web3(
+    new Web3.providers.HttpProvider(
+      nullthrows(
+        {
+          "1": "https://mainnet.infura.io/augur",
+          "4": "https://rinkeby.infura.io/augur"
+        }[`${network}`]
+      )
+    )
+  );
+  return nullthrows(publicCache[network]);
+}
+
+async function getPersonalWeb3(): Promise<Web3> {
+  if (personalCache !== null) {
+    return personalCache;
   }
 
   await waitForDocumentLoad();
@@ -32,15 +52,12 @@ async function getWeb3(): Promise<Web3> {
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
   if (typeof window.web3 !== "undefined") {
     // Use Mist/MetaMask's provider
-    cache = new Web3(window.web3.currentProvider);
+    personalCache = new Web3(window.web3.currentProvider);
   } else {
-    console.log("No web3? You should consider trying MetaMask!");
-    cache = new Web3(
-      new Web3.providers.HttpProvider("https://mainnet.infura.io/augur")
-    );
+    personalCache = await getPublicWeb3(1);
   }
 
-  return cache;
+  return personalCache;
 }
 
-export default getWeb3;
+export { getPublicWeb3, getPersonalWeb3 };

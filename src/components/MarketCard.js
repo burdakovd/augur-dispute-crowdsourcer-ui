@@ -73,9 +73,11 @@ const DisputeRounds = ({ outcome, info }) => {
     outcome.invalid === participant.outcome.invalid &&
     outcome.name === participant.outcome.name;
 
+  // TODO: show max size (for current round and others)
+  // TODO: hightlight inability to dispute for winning outcome
   return (
     <div className="dispute-rounds">
-      {ImmRange(0, info.participants.length + 2)
+      {ImmRange(0, info.participants.length + 3)
         .map(i => [
           i,
           i < info.participants.length ? info.participants[i] : null
@@ -125,7 +127,7 @@ const DisputeRounds = ({ outcome, info }) => {
                     ? info.isCrowdsourcing
                       ? "warning"
                       : "primary"
-                    : "info"
+                    : "link"
               }
             >
               {i}

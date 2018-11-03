@@ -3,7 +3,7 @@
 import type Web3 from "web3";
 import type { MarketInfo } from "../../actions/types";
 import abiDecodeShortStringAsInt256 from "speedomatic/src/abi-decode-short-string-as-int256";
-import { List as ImmList, Range as ImmRange } from "immutable";
+import { Range as ImmRange } from "immutable";
 import augurABI from "../../../abi/augur";
 import invariant from "invariant";
 import type { Addresses } from "../../../addresses";

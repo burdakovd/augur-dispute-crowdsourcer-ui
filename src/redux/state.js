@@ -1,6 +1,7 @@
 // @flow
 
 import { Map as ImmMap } from "immutable";
+import type { SearchResults } from "./actions/types";
 
 export type State = {|
   query: string,

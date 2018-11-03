@@ -8,7 +8,7 @@ import nullthrows from "nullthrows";
 import { Map as ImmMap } from "immutable";
 import { connect } from "react-redux";
 import type { State } from "../redux/state";
-import type { Dispatch } from "../redux/actions/types";
+import type { Dispatch, SearchResults } from "../redux/actions/types";
 import networkIDtoName from "../networks";
 import "./Home.css";
 
@@ -30,8 +30,8 @@ class SearchPage extends Component<SearchParams> {
           {this.props.network == null
             ? "Connecting to Ethereum network..."
             : `Connected to Ethereum network: ${ImmMap(networkIDtoName).get(
-                `${this.props.network}`,
-                this.props.network
+                `${nullthrows(this.props.network)}`,
+                nullthrows(this.props.network)
               )}`}
         </div>
         <form>
@@ -47,7 +47,11 @@ class SearchPage extends Component<SearchParams> {
             />
           </FormGroup>
         </form>
-        <div>{`${this.props.results || ".".repeat(this.props.progress)}`}</div>
+        <div>{`${
+          this.props.results
+            ? this.props.results.toString()
+            : ".".repeat(this.props.progress)
+        }`}</div>
       </div>
     );
   }
@@ -60,7 +64,10 @@ class SearchPage extends Component<SearchParams> {
 const mapStateToProps: State => * = (state: State) => ({
   query: state.query,
   network: state.network,
-  results: state.searchResults.get(state.network, ImmMap()).get(state.query),
+  results:
+    state.network == null
+      ? null
+      : state.searchResults.get(state.network, ImmMap()).get(state.query),
   progress: state.searchResultsProgress
 });
 

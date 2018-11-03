@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "dependencies": {
+    "augur.js": "^5.6.0",
     "debounce": "^1.2.0",
     "immutable": "FormAPI/immutable-js#v3.8.1-flow-fix",
     "invariant": "^2.2.4",

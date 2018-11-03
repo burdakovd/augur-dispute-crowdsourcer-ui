@@ -19,12 +19,10 @@ function reduce(state: State = getInitialState(), action: Action): State {
   } else if (action.type === "SEARCH_RESULTS") {
     const { network, query, results } = action;
 
-    const mapUpdate = (m, k, updater) => m.set(k, updater(m.get(k)));
-
     return {
       ...state,
-      searchResults: mapUpdate(state.searchResults, network, m =>
-        mapUpdate(m || ImmMap(), query, () => results)
+      searchResults: state.searchResults.update(network, m =>
+        (m || ImmMap()).update(query, _ => results)
       )
     };
   } else if (action.type === "SEARCH_RESULTS_PROGRESS") {

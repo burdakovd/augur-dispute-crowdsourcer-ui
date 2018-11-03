@@ -38,7 +38,7 @@ async function fetchMarketData(
   ]);
 
   const outcomes = {
-    BINARY: () => ["YES", "NO"],
+    BINARY: () => ["NO", "YES"],
     CATEGORICAL: () => marketCreationInfo.outcomes,
     SCALAR: () => ["(?0 scalar)", "(?1 scalar)"]
   }[marketCreationInfo.marketType]();

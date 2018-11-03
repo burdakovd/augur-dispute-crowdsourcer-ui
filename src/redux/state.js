@@ -1,11 +1,12 @@
 // @flow
 
 export type State = {|
-  query: string
+  query: string,
+  network: ?string
 |};
 
 function getInitialState(): State {
-  return { query: "" };
+  return { query: "", network: null };
 }
 
 export default getInitialState;

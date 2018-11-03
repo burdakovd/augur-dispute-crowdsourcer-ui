@@ -3,14 +3,19 @@
   "version": "0.1.0",
   "private": false,
   "dependencies": {
+    "debounce": "^1.2.0",
+    "immutable": "FormAPI/immutable-js#v3.8.1-flow-fix",
+    "invariant": "^2.2.4",
     "nullthrows": "^1.1.0",
     "react": "^16.6.0",
-    "react-dom": "^16.6.0",
-    "react-scripts": "2.1.1",
     "react-bootstrap": "^0.32.4",
+    "react-dom": "^16.6.0",
     "react-redux": "^5.1.0",
+    "react-scripts": "2.1.1",
     "redux": "^4.0.1",
-    "redux-thunk": "^2.3.0"
+    "redux-saga": "^0.16.2",
+    "redux-thunk": "^2.3.0",
+    "web3": "1.0.0-beta.36"
   },
   "scripts": {
     "start": "react-scripts start",

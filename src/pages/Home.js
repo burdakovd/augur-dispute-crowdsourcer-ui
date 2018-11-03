@@ -1,18 +1,20 @@
 // @flow
 
-import type { Dispatch } from "../redux/actions/types";
-import type { State } from "../redux/state";
-
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import FormGroup from "react-bootstrap/lib/FormGroup";
 import FormControl from "react-bootstrap/lib/FormControl";
 import nullthrows from "nullthrows";
+import { Map as ImmMap } from "immutable";
 import { connect } from "react-redux";
+import type { State } from "../redux/state";
+import type { Dispatch } from "../redux/actions/types";
+import networkIDtoName from "../networks";
 import "./Home.css";
 
 type SearchParams = {|
   query: string,
+  network: ?string,
   onQueryUpdated: string => void
 |};
 
@@ -22,6 +24,14 @@ class SearchPage extends Component<SearchParams> {
   render() {
     return (
       <div className="Home-search-page">
+        <div>
+          {this.props.network == null
+            ? "Connecting to Ethereum network..."
+            : `Connected to Ethereum network: ${ImmMap(networkIDtoName).get(
+                nullthrows(this.props.network),
+                nullthrows(this.props.network)
+              )}`}
+        </div>
         <form>
           <FormGroup controlId="search">
             <FormControl
@@ -44,24 +54,22 @@ class SearchPage extends Component<SearchParams> {
   }
 }
 
-const mapStateToProps = (state: State) => ({
-  query: state.query
+const mapStateToProps: State => * = (state: State) => ({
+  query: state.query,
+  network: state.network
 });
 
-const mapDispatchToProps = (dispatch: Dispatch) => {
+const mapDispatchToProps: Dispatch => * = (dispatch: Dispatch) => {
   return {
     onQueryUpdated: newQuery => {
       dispatch({
-        type: "SEARCH",
+        type: "SEARCH_QUERY_CHANGED",
         query: newQuery
       });
     }
   };
 };
 
-const Home = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(SearchPage);
+const Home = (connect: any)(mapStateToProps, mapDispatchToProps)(SearchPage);
 
 export default Home;

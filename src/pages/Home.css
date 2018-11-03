@@ -1,14 +1,19 @@
 .Home-search-page {
   display: flex;
+  flex-direction: column;
+  align-content: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
+  text-align: center;
 }
 
 .Home-search-page form {
   margin: 1em;
+  display: inline-block;
 }
 
 .Home-search-page input[type="text"] {
   width: 50em;
+  display: inline-block;
   text-align: center;
 }

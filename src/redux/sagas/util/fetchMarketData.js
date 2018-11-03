@@ -27,6 +27,7 @@ async function fetchMarketData(
     new web3.eth.Contract(augurABI.Market, marketID).methods
       .getNumParticipants()
       .call()
+      .then(Number.parseInt)
   ]);
 
   return {

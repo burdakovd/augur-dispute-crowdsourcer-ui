@@ -23,8 +23,12 @@ class Pool extends Component<Props> {
             <Col sm={12} lg={6}>
               <DisputeSummaryCard
                 market={this.props.match.params.market}
-                round={this.props.match.params.round}
-                outcomeIndex={this.props.match.params.outcome}
+                round={Number.parseInt(this.props.match.params.round)}
+                outcomeIndex={
+                  this.props.match.params.outcome != null
+                    ? Number.parseInt(this.props.match.params.outcome)
+                    : null
+                }
                 marketInfo={this.props.info}
               />
             </Col>

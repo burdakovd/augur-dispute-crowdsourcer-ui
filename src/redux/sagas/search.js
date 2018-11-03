@@ -48,79 +48,91 @@ function* handleSearchQuery(): * {
 
   try {
     const web3 = yield call(getWeb3);
-    const augur = yield call(getAugur, network);
-    const syncData = yield call(
-      () =>
-        new Promise((resolve, reject) =>
-          augur.augurNode.getSyncData(function(error, result) {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(result);
-            }
-          })
-        )
-    );
-    const markets = yield call(async () => {
-      const results = await Promise.all(
-        ["CROWDSOURCING_DISPUTE", "AWAITING_NEXT_WINDOW"].map(
-          state =>
-            new Promise((resolve, reject) =>
-              augur.markets.getMarkets(
-                {
-                  universe: syncData.addresses.Universe,
-                  search: query === "" ? undefined : query,
-                  reportingState: state
-                },
-                function(error, result) {
-                  if (error) {
-                    reject(error);
-                  } else {
-                    resolve(result);
-                  }
-                }
-              )
-            )
-        )
+
+    try {
+      const augur = yield call(getAugur, network);
+      const syncData = yield call(
+        () =>
+          new Promise((resolve, reject) =>
+            augur.augurNode.getSyncData(function(error, result) {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(result);
+              }
+            })
+          )
       );
+      const markets = yield call(async () => {
+        const results = await Promise.all(
+          ["CROWDSOURCING_DISPUTE", "AWAITING_NEXT_WINDOW"].map(
+            state =>
+              new Promise((resolve, reject) =>
+                augur.markets.getMarkets(
+                  {
+                    universe: syncData.addresses.Universe,
+                    search: query === "" ? undefined : query,
+                    reportingState: state
+                  },
+                  function(error, result) {
+                    if (error) {
+                      reject(error);
+                    } else {
+                      resolve(result);
+                    }
+                  }
+                )
+              )
+          )
+        );
 
-      // merge somewhat fairly
-      var seen = ImmSet();
-      var merged = ImmList();
+        // merge somewhat fairly
+        var seen = ImmSet();
+        var merged = ImmList();
 
-      const handle = address => {
-        if (!seen.contains(address)) {
-          seen = seen.add(address);
-          merged = merged.push(address);
+        const handle = address => {
+          if (!seen.contains(address)) {
+            seen = seen.add(address);
+            merged = merged.push(address);
+          }
+        };
+
+        if (web3.utils.isAddress(query)) {
+          handle(query);
         }
-      };
 
-      if (web3.utils.isAddress(query)) {
-        handle(query);
-      }
-
-      for (var i = 0; ; ++i) {
-        var shouldStop = true;
-        for (var set of results) {
-          if (set.length > i) {
-            handle(set[i]);
-            shouldStop = false;
+        for (var i = 0; ; ++i) {
+          var shouldStop = true;
+          for (var set of results) {
+            if (set.length > i) {
+              handle(set[i]);
+              shouldStop = false;
+            }
+          }
+          if (shouldStop) {
+            break;
           }
         }
-        if (shouldStop) {
-          break;
-        }
+
+        return merged;
+      });
+
+      yield put({
+        type: "SEARCH_RESULTS",
+        network,
+        query,
+        results: markets
+      });
+    } catch (Error) {
+      if (web3.utils.isAddress(query)) {
+        yield put({
+          type: "SEARCH_RESULTS",
+          network,
+          query,
+          results: [query]
+        });
       }
-
-      return merged;
-    });
-
-    yield put({
-      type: "SEARCH_RESULTS",
-      network,
-      query,
-      results: markets
-    });
+    }
   } finally {
     yield cancel(progressReporter);
   }

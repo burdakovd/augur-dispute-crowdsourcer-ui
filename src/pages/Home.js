@@ -49,7 +49,9 @@ class SearchPage extends Component<SearchParams> {
         </form>
         <div>{`${
           this.props.results
-            ? this.props.results.toString()
+            ? this.props.results.size
+              ? this.props.results.toString()
+              : "No markets found for the query"
             : ".".repeat(this.props.progress)
         }`}</div>
       </div>

@@ -3,6 +3,7 @@
 import type { State } from "../redux/state";
 import { Map as ImmMap, List as ImmList, Range as ImmRange } from "immutable";
 import nullthrows from "nullthrows";
+import { LinkContainer } from "react-router-bootstrap";
 import React from "react";
 import Tooltip from "react-bootstrap/lib/Tooltip";
 import OverlayTrigger from "react-bootstrap/lib/OverlayTrigger";
@@ -26,7 +27,7 @@ const MarketCard = ({ id, info }: { id: string, info: * }) => {
         {info != null ? info.marketType : "(market type unknown)"},{" "}
         <PredictionsGlobalLink id={id} />, <ReportersChatLink id={id} />
       </Panel.Body>
-      <Table bordered>
+      <Table bordered className="market-card">
         <thead>
           <tr>
             <th>Outcome</th>
@@ -46,13 +47,18 @@ const MarketCard = ({ id, info }: { id: string, info: * }) => {
               })
               .map((outcome, index) => (
                 <tr key={index}>
-                  <td>
+                  <td className="outcome">
                     <span className={outcome.invalid ? "invalid-outcome" : ""}>
                       {outcome.name}
                     </span>
                   </td>
                   <td>
-                    <DisputeRounds outcome={outcome} info={info} />
+                    <DisputeRounds
+                      id={id}
+                      outcomeIndex={index}
+                      outcome={outcome}
+                      info={info}
+                    />
                   </td>
                 </tr>
               ))
@@ -67,7 +73,7 @@ const MarketCard = ({ id, info }: { id: string, info: * }) => {
   );
 };
 
-const DisputeRounds = ({ outcome, info }) => {
+const DisputeRounds = ({ id, outcomeIndex, outcome, info }) => {
   const isOurParticipant = participant =>
     participant.outcome != null &&
     outcome.invalid === participant.outcome.invalid &&
@@ -117,21 +123,29 @@ const DisputeRounds = ({ outcome, info }) => {
               </Tooltip>
             }
           >
-            <Button
-              bsStyle={
-                i < info.participants.length
-                  ? isOurParticipant(nullthrows(participant))
-                    ? "success"
-                    : undefined
-                  : i === info.participants.length
-                    ? info.isCrowdsourcing
-                      ? "warning"
-                      : "primary"
-                    : "link"
+            <LinkContainer
+              to={
+                outcome.invalid
+                  ? `/${id}/${i}/invalid`
+                  : `/${id}/${i}/valid/${outcomeIndex}`
               }
             >
-              {i}
-            </Button>
+              <Button
+                bsStyle={
+                  participant != null
+                    ? isOurParticipant(nullthrows(participant))
+                      ? "success"
+                      : undefined
+                    : i === info.participants.length
+                      ? info.isCrowdsourcing
+                        ? "warning"
+                        : "primary"
+                      : "link"
+                }
+              >
+                {i}
+              </Button>
+            </LinkContainer>
           </OverlayTrigger>
         ))
         .toArray()}

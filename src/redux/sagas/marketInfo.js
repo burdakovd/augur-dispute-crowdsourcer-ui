@@ -57,15 +57,27 @@ function* fetch(network: number, id: string): * {
 }
 
 function* index(): * {
+  var queued: ImmSet<string> = ImmSet();
   var handled: ImmMap<number, ImmSet<string>> = ImmMap();
 
   while (true) {
-    const { id } = yield take("MARKET_INFO_NEEDED");
+    const action = yield take(["MARKET_INFO_NEEDED", "NETWORK_CHANGED"]);
+    if (action.type === "MARKET_INFO_NEEDED") {
+      queued = queued.add(action.id);
+    }
+
     const network = yield select(state => state.network);
 
-    if (!handled.get(network, ImmSet()).contains(id)) {
-      handled = handled.update(network, ImmSet(), s => s.add(id));
-      yield fork(fetch, network, id);
+    if (network != null) {
+      while (!queued.isEmpty()) {
+        const id = queued.first();
+        queued = queued.remove(id);
+
+        if (!handled.get(network, ImmSet()).contains(id)) {
+          handled = handled.update(network, ImmSet(), s => s.add(id));
+          yield fork(fetch, network, id);
+        }
+      }
     }
   }
 }

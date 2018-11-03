@@ -12,3 +12,23 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+.invalid-outcome {
+  color: #ffaaaa;
+}
+
+.dispute-rounds {
+  text-align: left;
+}
+
+.dispute-rounds .btn {
+  margin: 0.25em;
+}
+
+.market-card th {
+  text-align: center;
+}
+
+.market-card td.outcome {
+  vertical-align: middle;
+}

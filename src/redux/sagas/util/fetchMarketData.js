@@ -2,7 +2,7 @@
 
 import type Web3 from "web3";
 import type { MarketInfo } from "../../actions/types";
-
+import abiDecodeShortStringAsInt256 from "speedomatic/src/abi-decode-short-string-as-int256";
 import { List as ImmList, Range as ImmRange } from "immutable";
 import augurABI from "../../../abi/augur";
 import invariant from "invariant";
@@ -26,7 +26,13 @@ async function fetchMarketData(
   ]);
 
   return {
-    name: marketCreationInfo.description
+    name: marketCreationInfo.description,
+    marketType: marketCreationInfo.marketType,
+    outcomes: {
+      BINARY: () => ["YES", "NO"],
+      CATEGORICAL: () => marketCreationInfo.outcomes,
+      SCALAR: () => ["(?0 scalar)", "(?1 scalar)"]
+    }[marketCreationInfo.marketType]()
   };
 }
 
@@ -74,7 +80,11 @@ async function fetchMarketCreationInfo(
   const event = onlyx(logs);
 
   return {
-    description: event.description
+    description: event.description,
+    marketType: ["BINARY", "CATEGORICAL", "SCALAR"][event.marketType],
+    outcomes: event.outcomes.map(o =>
+      abiDecodeShortStringAsInt256(o).toString()
+    )
   };
 }
 

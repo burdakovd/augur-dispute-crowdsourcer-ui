@@ -49,22 +49,19 @@ function* handleSearchQuery(): * {
   try {
     const web3 = yield call(getWeb3);
 
-    try {
-      const augur = yield call(getAugur, network);
-      const syncData = yield call(
-        () =>
-          new Promise((resolve, reject) =>
-            augur.augurNode.getSyncData(function(error, result) {
-              if (error) {
-                reject(error);
-              } else {
-                resolve(result);
-              }
-            })
-          )
-      );
-      const markets = yield call(async () => {
-        const results = await Promise.all(
+    const extraMarkets = yield call(async () => {
+      try {
+        const augur = await getAugur(network);
+        const syncData = await new Promise((resolve, reject) =>
+          augur.augurNode.getSyncData(function(error, result) {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          })
+        );
+        return await Promise.all(
           ["CROWDSOURCING_DISPUTE", "AWAITING_NEXT_WINDOW"].map(
             state =>
               new Promise((resolve, reject) =>
@@ -85,54 +82,48 @@ function* handleSearchQuery(): * {
               )
           )
         );
-
-        // merge somewhat fairly
-        var seen = ImmSet();
-        var merged = ImmList();
-
-        const handle = address => {
-          if (!seen.contains(address)) {
-            seen = seen.add(address);
-            merged = merged.push(address);
-          }
-        };
-
-        if (web3.utils.isAddress(query)) {
-          handle(query);
-        }
-
-        for (var i = 0; ; ++i) {
-          var shouldStop = true;
-          for (var set of results) {
-            if (set.length > i) {
-              handle(set[i]);
-              shouldStop = false;
-            }
-          }
-          if (shouldStop) {
-            break;
-          }
-        }
-
-        return merged;
-      });
-
-      yield put({
-        type: "SEARCH_RESULTS",
-        network,
-        query,
-        results: markets.take(10)
-      });
-    } catch (Error) {
-      if (web3.utils.isAddress(query)) {
-        yield put({
-          type: "SEARCH_RESULTS",
-          network,
-          query,
-          results: [query]
-        });
+      } catch (Error) {
+        return [];
       }
-    }
+    });
+
+    const merge = arrays => {
+      // merge somewhat fairly
+      var seen = ImmSet();
+      var merged = ImmList();
+
+      const handle = address => {
+        if (!seen.contains(address)) {
+          seen = seen.add(address);
+          merged = merged.push(address);
+        }
+      };
+
+      for (var i = 0; ; ++i) {
+        var shouldStop = true;
+        for (var set of arrays) {
+          if (set.length > i) {
+            handle(set[i]);
+            shouldStop = false;
+          }
+        }
+        if (shouldStop) {
+          break;
+        }
+      }
+
+      return merged;
+    };
+
+    yield put({
+      type: "SEARCH_RESULTS",
+      network,
+      query,
+      results: merge([
+        web3.utils.isAddress(query) ? [query] : [],
+        ...extraMarkets
+      ]).take(10)
+    });
   } finally {
     yield cancel(progressReporter);
   }

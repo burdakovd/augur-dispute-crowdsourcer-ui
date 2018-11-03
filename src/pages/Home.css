@@ -24,3 +24,11 @@
   min-width: 600px;
   max-width: 1200px;
 }
+
+.Home-search-results th {
+  text-align: center;
+}
+
+.invalid-outcome {
+  color: #ffaaaa;
+}

@@ -2,11 +2,15 @@
 
 import type { State } from "../redux/state";
 import { Map as ImmMap, List as ImmList, Range as ImmRange } from "immutable";
+import nullthrows from "nullthrows";
 import React from "react";
+import Tooltip from "react-bootstrap/lib/Tooltip";
+import OverlayTrigger from "react-bootstrap/lib/OverlayTrigger";
 import Button from "react-bootstrap/lib/Button";
 import Panel from "react-bootstrap/lib/Panel";
 import Table from "react-bootstrap/lib/Table";
 import { connect } from "react-redux";
+import Amount from "./Amount";
 import MarketName from "./MarketName";
 
 const MarketCard = ({ id, info }: { id: string, info: * }) => {
@@ -48,7 +52,7 @@ const MarketCard = ({ id, info }: { id: string, info: * }) => {
                     </span>
                   </td>
                   <td>
-                    <DisputeRounds info={info} />
+                    <DisputeRounds outcome={outcome} info={info} />
                   </td>
                 </tr>
               ))
@@ -63,14 +67,70 @@ const MarketCard = ({ id, info }: { id: string, info: * }) => {
   );
 };
 
-const DisputeRounds = ({ info }) => {
+const DisputeRounds = ({ outcome, info }) => {
+  const isOurParticipant = participant =>
+    participant.outcome != null &&
+    outcome.invalid === participant.outcome.invalid &&
+    outcome.name === participant.outcome.name;
+
   return (
     <div className="dispute-rounds">
-      {ImmRange(0, info.numParticipants + 2)
-        .map(i => (
-          <Button bsStyle="success" key={i}>
-            {i}
-          </Button>
+      {ImmRange(0, info.participants.length + 2)
+        .map(i => [
+          i,
+          i < info.participants.length ? info.participants[i] : null
+        ])
+        .map(([i, participant]) => (
+          <OverlayTrigger
+            key={i}
+            placement="top"
+            overlay={
+              <Tooltip id="tooltip">
+                contribution:{" "}
+                {participant != null ? (
+                  <span>
+                    filled{" "}
+                    <Amount
+                      size={
+                        isOurParticipant(participant) ? participant.size : "0"
+                      }
+                    />{" "}
+                    REP
+                  </span>
+                ) : i < info.participants.length ? (
+                  isOurParticipant(nullthrows(participant)) ? (
+                    "filled"
+                  ) : (
+                    "not filled"
+                  )
+                ) : i === info.participants.length ? (
+                  info.isCrowdsourcing ? (
+                    "crowdsourcing now"
+                  ) : (
+                    "will start crowdsourcing next round"
+                  )
+                ) : (
+                  "may start crowdsourcing in the future"
+                )}
+              </Tooltip>
+            }
+          >
+            <Button
+              bsStyle={
+                i < info.participants.length
+                  ? isOurParticipant(nullthrows(participant))
+                    ? "success"
+                    : undefined
+                  : i === info.participants.length
+                    ? info.isCrowdsourcing
+                      ? "warning"
+                      : "primary"
+                    : "info"
+              }
+            >
+              {i}
+            </Button>
+          </OverlayTrigger>
         ))
         .toArray()}
     </div>

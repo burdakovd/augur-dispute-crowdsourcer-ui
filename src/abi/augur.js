@@ -1596,4 +1596,10 @@ const Universe = [
   }
 ];
 
-export default { Augur, Universe, Market: AugurCoreLatestABI.Market };
+export default {
+  Augur,
+  Universe,
+  Market: AugurCoreLatestABI.Market,
+  DisputeCrowdsourcer: AugurCoreLatestABI.DisputeCrowdsourcer,
+  FeeWindow: AugurCoreLatestABI.FeeWindow
+};

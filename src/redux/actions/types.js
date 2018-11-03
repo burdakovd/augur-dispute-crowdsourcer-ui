@@ -7,7 +7,14 @@ export type MarketInfo = {|
   name: string,
   marketType: string,
   outcomes: Array<string>,
-  numParticipants: number
+  participants: Array<{
+    outcome: ?{
+      name: string,
+      invalid: boolean
+    },
+    size: string
+  }>,
+  isCrowdsourcing: boolean
 |};
 
 export type Action =

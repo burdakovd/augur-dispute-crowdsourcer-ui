@@ -14,31 +14,100 @@ async function fetchMarketData(
   marketID: string,
   creationBlock: number
 ): Promise<MarketInfo> {
+  const market = new web3.eth.Contract(augurABI.Market, marketID);
+
   const [
     // eslint-disable-next-line no-unused-vars
     _,
     marketCreationInfo,
-    numParticipants
+    numParticipants,
+    numTicks
   ] = await Promise.all([
     // We need to ensure that market belongs to
     // trusted universe.
     ensureMarketIsLegitAndIsFromTrustedUniverse(web3, marketID),
     fetchMarketCreationInfo(web3, marketID, creationBlock),
-    new web3.eth.Contract(augurABI.Market, marketID).methods
+    market.methods
       .getNumParticipants()
+      .call()
+      .then(Number.parseInt),
+    market.methods
+      .getNumTicks()
       .call()
       .then(Number.parseInt)
   ]);
 
+  const outcomes = {
+    BINARY: () => ["YES", "NO"],
+    CATEGORICAL: () => marketCreationInfo.outcomes,
+    SCALAR: () => ["(?0 scalar)", "(?1 scalar)"]
+  }[marketCreationInfo.marketType]();
+
+  const getParticipantInfo = async index => {
+    const participantAddress = await market.methods
+      .getReportingParticipant(index)
+      .call();
+    const participant = new web3.eth.Contract(
+      augurABI.DisputeCrowdsourcer,
+      participantAddress
+    );
+    const [size, invalid, payouts] = await Promise.all([
+      participant.methods.getSize().call(),
+      participant.methods.isInvalid().call(),
+      Promise.all(
+        ImmRange(0, outcomes.length)
+          .toArray()
+          .map(
+            async outcomeIndex =>
+              await participant.methods
+                .getPayoutNumerator(outcomeIndex)
+                .call()
+                .then(Number.parseInt)
+          )
+      )
+    ]);
+
+    const outcome = invalid
+      ? ImmRange(0, outcomes.length)
+          .filter(
+            outcomeIndex =>
+              payouts[outcomeIndex] !== Math.floor(numTicks / outcomes.length)
+          )
+          .isEmpty()
+        ? { name: "INVALID", invalid: true }
+        : null
+      : (a =>
+          a.length === 1 ? { name: outcomes[a[0]], invalid: false } : null)(
+          ImmRange(0, outcomes.length)
+            .filter(outcomeIndex => payouts[outcomeIndex] !== 0)
+            .toArray()
+        );
+
+    return {
+      outcome: outcome,
+      size
+    };
+  };
+
+  const participants = await Promise.all(
+    ImmRange(0, numParticipants)
+      .toArray()
+      .map(async index => await getParticipantInfo(index))
+  );
+
+  const feeWindow = await market.methods
+    .getFeeWindow()
+    .call()
+    .then(address => new web3.eth.Contract(augurABI.FeeWindow, address));
+
+  const isCrowdsourcing = await feeWindow.methods.isActive().call();
+
   return {
     name: marketCreationInfo.description,
     marketType: marketCreationInfo.marketType,
-    outcomes: {
-      BINARY: () => ["YES", "NO"],
-      CATEGORICAL: () => marketCreationInfo.outcomes,
-      SCALAR: () => ["(?0 scalar)", "(?1 scalar)"]
-    }[marketCreationInfo.marketType](),
-    numParticipants: numParticipants
+    outcomes: outcomes,
+    participants: participants,
+    isCrowdsourcing
   };
 }
 

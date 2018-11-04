@@ -5,19 +5,24 @@ import React from "react";
 import Panel from "react-bootstrap/lib/Panel";
 import Table from "react-bootstrap/lib/Table";
 import Web3 from "web3";
+import moment from "moment";
+import { connect } from "react-redux";
 import Amount from "./Amount";
-import type { MarketInfo } from "../redux/actions/types";
+import type { MarketInfo, PoolInfo } from "../redux/actions/types";
+import type { State } from "../redux/state";
 
 const DisputeSummaryCard = ({
   market,
   round,
   outcomeIndex,
-  marketInfo
+  marketInfo,
+  poolInfo
 }: {
   market: string,
   round: number,
   outcomeIndex: ?number,
-  marketInfo: MarketInfo
+  marketInfo: MarketInfo,
+  poolInfo: PoolInfo
 }) => {
   const isOurParticipant = participant =>
     participant.outcome != null &&
@@ -52,11 +57,19 @@ const DisputeSummaryCard = ({
         <tbody>
           <tr>
             <td>Round start time</td>
-            <td>TBD</td>
+            <td>
+              {poolInfo != null
+                ? moment.unix(poolInfo.startTime).toISOString()
+                : "loading..."}
+            </td>
           </tr>
           <tr>
             <td>Round end time</td>
-            <td>TBD</td>
+            <td>
+              {poolInfo != null
+                ? moment.unix(poolInfo.endTime).toISOString()
+                : "loading..."}
+            </td>
           </tr>
           <tr>
             <td>Total size to fill in this round</td>
@@ -117,4 +130,17 @@ const DisputeSummaryCard = ({
   );
 };
 
-export default DisputeSummaryCard;
+const mapStateToProps = (state: State, ownProps: *) => ({
+  poolInfo:
+    state.network == null
+      ? null
+      : state.poolInfo.get(
+          `${state.network}:${ownProps.market}:${ownProps.round}:${
+            ownProps.outcomeIndex == null ? "-1" : ownProps.outcomeIndex
+          }`
+        )
+});
+
+const Container = (connect: any)(mapStateToProps)(DisputeSummaryCard);
+
+export default Container;

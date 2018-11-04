@@ -1,5 +1,7 @@
 // @flow
 
+import CrowdsourcerFactory from "augur-dispute-crowdsourcer/build/contracts/CrowdsourcerFactory.json";
+
 // TODO:
 // Use data from here instead:
 // https://github.com/AugurProject/augur.js/blob/master/src/contracts/addresses.json
@@ -9,5 +11,6 @@ const Universe = "0x02149d40d255fceac54a3ee3899807b0539bad60";
 
 export default {
   Augur,
-  Universe
+  Universe,
+  CrowdsourcerFactory: CrowdsourcerFactory.networks["4"].address
 };

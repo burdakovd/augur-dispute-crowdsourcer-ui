@@ -38,6 +38,21 @@ function reduce(state: State = getInitialState(), action: Action): State {
         (m || ImmMap()).update(id, _ => info)
       )
     };
+  } else if (action.type === "GOT_CONTRACT_ADDRESSES") {
+    const { network, addresses } = action;
+    return {
+      ...state,
+      contractAddresses: state.contractAddresses.set(network, addresses)
+    };
+  } else if (action.type === "GOT_POOL_INFO") {
+    const { network, market, round, outcome, info } = action;
+    const key = `${network}:${market}:${round}:${
+      outcome == null ? "-1" : outcome
+    }`;
+    return {
+      ...state,
+      poolInfo: state.poolInfo.set(key, info)
+    };
   }
 
   return state;

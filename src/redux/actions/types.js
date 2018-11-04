@@ -1,5 +1,7 @@
 // @flow
 
+import type { Addresses } from "../../addresses";
+
 import { List as ImmList } from "immutable";
 
 export type SearchResults = ImmList<string>;
@@ -15,6 +17,11 @@ export type MarketInfo = {|
     size: string
   }>,
   isCrowdsourcing: boolean
+|};
+export type PoolInfo = {|
+  address: string,
+  startTime: number,
+  endTime: number
 |};
 
 export type Action =
@@ -43,6 +50,33 @@ export type Action =
       network: number,
       id: string,
       info: MarketInfo
+    }
+  | {
+      type: "GOT_CONTRACT_ADDRESSES",
+      network: number,
+      addresses: Addresses
+    }
+  | {
+      type: "SUBSCRIBE_POOL_EVENTS",
+      network: number,
+      market: string,
+      round: number,
+      outcome: ?number
+    }
+  | {
+      type: "UNSUBSCRIBE_POOL_EVENTS",
+      network: number,
+      market: string,
+      round: number,
+      outcome: ?number
+    }
+  | {
+      type: "GOT_POOL_INFO",
+      network: number,
+      market: string,
+      round: number,
+      outcome: ?number,
+      info: PoolInfo
     };
 
 export type Dispatch = (action: Action) => any;

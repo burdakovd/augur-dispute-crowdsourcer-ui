@@ -17,6 +17,10 @@ type Props = {| info: MarketInfo, match: *, requestInfo: () => void |};
 
 class Pool extends Component<Props> {
   render() {
+    if (this.props.info != null && this.props.info.marketType === "SCALAR") {
+      return "Scalar markets aren't supported by UI yet";
+    }
+
     return (
       <Fragment>
         <Grid fluid className="pool-page">
@@ -50,6 +54,15 @@ class Pool extends Component<Props> {
             </Col>
           </Row>
         </Grid>
+        <PoolSubscriber
+          market={this.props.match.params.market}
+          round={Number.parseInt(this.props.match.params.round)}
+          outcome={
+            this.props.match.params.outcome != null
+              ? Number.parseInt(this.props.match.params.outcome)
+              : null
+          }
+        />
       </Fragment>
     );
   }
@@ -66,6 +79,71 @@ class Pool extends Component<Props> {
     }
   }
 }
+
+class PoolSubscriberInner extends Component<{
+  network: ?number,
+  market: string,
+  round: number,
+  outcome: ?number,
+  dispatch: Dispatch
+}> {
+  render() {
+    return <Fragment />;
+  }
+
+  componentDidMount() {
+    this.subscribe();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (
+      this.props.network === prevProps.network &&
+      this.props.market === prevProps.market &&
+      this.props.round === prevProps.round &&
+      this.props.outcome === prevProps.outcome
+    ) {
+      return;
+    }
+
+    this.unsubscribe(prevProps);
+    this.subscribe();
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe(this.props);
+  }
+
+  subscribe() {
+    if (this.props.network != null) {
+      this.props.dispatch({
+        type: "SUBSCRIBE_POOL_EVENTS",
+        network: this.props.network,
+        market: this.props.market,
+        round: this.props.round,
+        outcome: this.props.outcome
+      });
+    }
+  }
+
+  unsubscribe(props: *) {
+    if (props.network != null) {
+      props.dispatch({
+        type: "UNSUBSCRIBE_POOL_EVENTS",
+        network: props.network,
+        market: props.market,
+        round: props.round,
+        outcome: props.outcome
+      });
+    }
+  }
+}
+
+const PoolSubscriber = (connect: any)(
+  (state: State) => ({ network: state.network }),
+  dispatch => ({
+    dispatch
+  })
+)(PoolSubscriberInner);
 
 const mapStateToProps = (state: State, ownProps: *) => ({
   info:

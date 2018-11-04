@@ -3,7 +3,11 @@
 import React from "react";
 import Panel from "react-bootstrap/lib/Panel";
 import Table from "react-bootstrap/lib/Table";
+import AddressLink from "./AddressLink";
+import { Map as ImmMap } from "immutable";
 import type { MarketInfo } from "../redux/actions/types";
+import type { State } from "../redux/state";
+import { connect } from "react-redux";
 
 const DisputePoolCard = ({
   market,
@@ -25,7 +29,9 @@ const DisputePoolCard = ({
         <tbody>
           <tr>
             <td>Factory address</td>
-            <td>TBD</td>
+            <td>
+              <FactoryAddress />
+            </td>
           </tr>
           <tr>
             <td>Pool address</td>
@@ -44,5 +50,18 @@ const DisputePoolCard = ({
     </Panel>
   );
 };
+
+const FactoryAddress = connect((state: State) => ({
+  network: state.network,
+  address: ((state.contractAddresses || ImmMap()).get(state.network || 0) || {})
+    .CrowdsourcerFactory
+}))(
+  ({ network, address }) =>
+    network != null && address != null ? (
+      <AddressLink address={address} network={network} />
+    ) : (
+      "Loading..."
+    )
+);
 
 export default DisputePoolCard;

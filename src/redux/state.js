@@ -1,14 +1,17 @@
 // @flow
 
 import { Map as ImmMap } from "immutable";
-import type { MarketInfo, SearchResults } from "./actions/types";
+import type { Addresses } from "../addresses";
+import type { MarketInfo, SearchResults, PoolInfo } from "./actions/types";
 
 export type State = {|
   query: string,
   network: ?number,
   searchResultsProgress: number,
   searchResults: ImmMap<number, ImmMap<string, SearchResults>>,
-  marketInfo: ImmMap<number, ImmMap<string, MarketInfo>>
+  marketInfo: ImmMap<number, ImmMap<string, MarketInfo>>,
+  contractAddresses: ImmMap<number, Addresses>,
+  poolInfo: ImmMap<string, PoolInfo>
 |};
 
 function getInitialState(): State {
@@ -17,7 +20,9 @@ function getInitialState(): State {
     searchResultsProgress: 0,
     network: null,
     searchResults: ImmMap(),
-    marketInfo: ImmMap()
+    marketInfo: ImmMap(),
+    contractAddresses: ImmMap(),
+    poolInfo: ImmMap()
   };
 }
 

@@ -9,5 +9,8 @@ const Universe = "0xe991247b78f937d7b69cfc00f1a487a293557677";
 
 export default {
   Augur,
-  Universe
+  Universe,
+  // TODO: update this after it is deployed on mainnet
+  // CrowdsourcerFactory.networks["1"].address
+  CrowdsourcerFactory: ""
 };

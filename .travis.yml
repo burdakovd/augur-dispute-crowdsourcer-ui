@@ -13,6 +13,6 @@ script:
   - yarn lint
   - yarn test --coverage
   - yarn build
-  - rm -rf node_modules build
+  - rm -rf node_modules build coverage
   - docker build . -t ipfs_print_hash
   - docker run ipfs_print_hash

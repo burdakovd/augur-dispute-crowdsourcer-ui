@@ -198,6 +198,7 @@ function* monitor(
       .toBN(repCrowdsourcer)
       .add(web3.utils.toBN(repDisputer));
     var disputeTokensBalance = null;
+    var disputeTokensAddress = null;
 
     if (hasDisputed) {
       const disputeToken = await pool.methods
@@ -212,12 +213,14 @@ function* monitor(
       disputeTokensBalance = web3.utils
         .toBN(dtCrowdsourcer)
         .add(web3.utils.toBN(dtDisputer));
+      disputeTokensAddress = disputeToken.options.address;
     }
 
     return {
       rep: repBalance.toString(),
       disputeTokens:
-        disputeTokensBalance == null ? null : disputeTokensBalance.toString()
+        disputeTokensBalance == null ? null : disputeTokensBalance.toString(),
+      disputeTokensAddress
     };
   };
 

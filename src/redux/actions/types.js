@@ -26,6 +26,7 @@ export type PoolInfo = {|
   feeWindowID: number,
   state: ?{|
     rep: string,
+    disputeTokensAddress: ?string,
     disputeTokens: ?string
   |}
 |};

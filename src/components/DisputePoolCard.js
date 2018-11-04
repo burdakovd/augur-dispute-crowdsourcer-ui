@@ -14,6 +14,7 @@ import type { State } from "../redux/state";
 import { connect } from "react-redux";
 import getContractAddresses from "../addresses";
 import poolAbi from "../abi/pool";
+import Amount from "./Amount";
 
 const DisputePoolCard = ({
   market,
@@ -83,12 +84,45 @@ const DisputePoolCard = ({
             </td>
           </tr>
           <tr>
-            <td>Pool holdings (funds usable for dispute)</td>
-            <td>TBD</td>
+            <td>Pool holdings (REP)</td>
+            <td>
+              {poolInfo != null ? (
+                Web3.utils.toBN(poolInfo.address).eq(Web3.utils.toBN(0)) ? (
+                  "(need to create pool first)"
+                ) : poolInfo.state != null ? (
+                  <span>
+                    <Amount size={poolInfo.state.rep} /> REP
+                  </span>
+                ) : (
+                  "loading..."
+                )
+              ) : (
+                "loading..."
+              )}
+            </td>
           </tr>
           <tr>
-            <td>Pool holdings (fees)</td>
-            <td>TBD</td>
+            <td>Pool holdings (dispute tokens)</td>
+            <td>
+              {poolInfo != null ? (
+                Web3.utils.toBN(poolInfo.address).eq(Web3.utils.toBN(0)) ? (
+                  "(need to create pool first)"
+                ) : poolInfo.state != null ? (
+                  poolInfo.state.disputeTokens != null ? (
+                    <span>
+                      <Amount size={poolInfo.state.disputeTokens} /> dispute
+                      tokens
+                    </span>
+                  ) : (
+                    "(dispute tokens will only appear after dispute)"
+                  )
+                ) : (
+                  "loading..."
+                )
+              ) : (
+                "loading..."
+              )}
+            </td>
           </tr>
         </tbody>
       </Table>

@@ -23,7 +23,11 @@ export type PoolInfo = {|
   address: string,
   startTime: number,
   endTime: number,
-  feeWindowID: number
+  feeWindowID: number,
+  state: ?{|
+    rep: string,
+    disputeTokens: ?string
+  |}
 |};
 
 export type Action =

@@ -118,21 +118,7 @@ function* monitor(
       .call();
   };
 
-  var address = yield call(getPoolAddress);
-
-  yield put({
-    type: "GOT_POOL_INFO",
-    network,
-    round,
-    market,
-    outcome,
-    info: {
-      address,
-      startTime: feeWindowStartTime,
-      endTime: feeWindowStartTime + Number.parseInt(disputeRoundDuration),
-      feeWindowID
-    }
-  });
+  var address = null;
 
   const factoryLogsChannel = yield call(() =>
     eventChannel(emitter => {
@@ -159,9 +145,7 @@ function* monitor(
   );
 
   try {
-    while (web3.utils.toBN(address).eq(web3.utils.toBN(0))) {
-      // wait for events
-      yield take(factoryLogsChannel);
+    while (true) {
       address = yield call(getPoolAddress);
       yield put({
         type: "GOT_POOL_INFO",
@@ -176,9 +160,115 @@ function* monitor(
           feeWindowID
         }
       });
+
+      if (!web3.utils.toBN(address).eq(web3.utils.toBN(0))) {
+        break;
+      }
+
+      // wait for events
+      yield take(factoryLogsChannel);
     }
   } finally {
     factoryLogsChannel.close();
+  }
+
+  address = nullthrows(address);
+
+  console.log(
+    `Observed non-zero address of crowdsourcer pool: ${address}, proceeding with monitoring its state`
+  );
+
+  const pool = new web3.eth.Contract(poolAbi.Crowdsourcer, address);
+  const REP = yield call(() =>
+    pool.methods
+      .getREP()
+      .call()
+      .then(address => new web3.eth.Contract(poolAbi.IERC20, address))
+  );
+  const disputerAddress = yield call(() => pool.methods.getDisputer().call());
+
+  const getBalances = async () => {
+    const [repCrowdsourcer, repDisputer, hasDisputed] = await Promise.all([
+      REP.methods.balanceOf(pool.options.address).call(),
+      REP.methods.balanceOf(disputerAddress).call(),
+      pool.methods.hasDisputed().call()
+    ]);
+
+    const repBalance = web3.utils
+      .toBN(repCrowdsourcer)
+      .add(web3.utils.toBN(repDisputer));
+    var disputeTokensBalance = null;
+
+    if (hasDisputed) {
+      const disputeToken = await pool.methods
+        .getDisputeToken()
+        .call()
+        .then(address => new web3.eth.Contract(poolAbi.IERC20, address));
+
+      const [dtCrowdsourcer, dtDisputer] = await Promise.all([
+        disputeToken.methods.balanceOf(pool.options.address).call(),
+        disputeToken.methods.balanceOf(disputerAddress).call()
+      ]);
+      disputeTokensBalance = web3.utils
+        .toBN(dtCrowdsourcer)
+        .add(web3.utils.toBN(dtDisputer));
+    }
+
+    return {
+      rep: repBalance.toString(),
+      disputeToken:
+        disputeTokensBalance == null ? null : disputeTokensBalance.toString()
+    };
+  };
+
+  const crowdsourcerLogsChannel = yield call(() =>
+    eventChannel(emitter => {
+      console.log("starting web3 subscription");
+      const subscription = web3.eth.subscribe(
+        "logs",
+        {
+          address: nullthrows(address)
+        },
+        (e, r) => {
+          if (e) {
+            console.error(e);
+          } else {
+            emitter(nullthrows(r));
+          }
+        }
+      );
+
+      return () => {
+        console.log("closing web3 subscription");
+        subscription.unsubscribe();
+      };
+    })
+  );
+
+  var balances = null;
+
+  try {
+    while (true) {
+      balances = yield call(getBalances);
+      yield put({
+        type: "GOT_POOL_INFO",
+        network,
+        round,
+        market,
+        outcome,
+        info: {
+          address,
+          startTime: feeWindowStartTime,
+          endTime: feeWindowStartTime + Number.parseInt(disputeRoundDuration),
+          feeWindowID,
+          state: balances
+        }
+      });
+      // wait for events
+      yield take(crowdsourcerLogsChannel);
+    }
+  } finally {
+    crowdsourcerLogsChannel.close();
   }
 }
 

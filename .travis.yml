@@ -14,4 +14,5 @@ script:
   - yarn test --coverage
   - yarn build
   - git clean -dfx
+  - docker build . -t ipfs_print_hash
   - docker run ipfs_print_hash

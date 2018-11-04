@@ -98,7 +98,7 @@ const DisputeSummaryCard = ({
                     REP
                   </span>
                 ) : (
-                  <em>Unknown, depends on how previous rounds will go</em>
+                  <em>Unknown, depends on how previous rounds go</em>
                 )
               ) : (
                 "loading..."
@@ -115,7 +115,18 @@ const DisputeSummaryCard = ({
                   </span>
                 ) : round === marketInfo.participants.length &&
                 marketInfo.isCrowdsourcing ? (
-                  "Unknown (round is in progress), TODO: actually calculate current balance"
+                  <span>
+                    <Amount
+                      size={
+                        marketInfo.currentRoundCrowdsourcers[
+                          outcomeIndex == null
+                            ? marketInfo.outcomes.length
+                            : outcomeIndex
+                        ]
+                      }
+                    />{" "}
+                    REP
+                  </span>
                 ) : (
                   "0 REP (round has not started yet)"
                 )

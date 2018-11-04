@@ -17,6 +17,7 @@ export type MarketInfo = {|
     },
     size: string
   }>,
+  currentRoundCrowdsourcers: Array</*size*/ string>,
   isCrowdsourcing: boolean
 |};
 export type PoolInfo = {|

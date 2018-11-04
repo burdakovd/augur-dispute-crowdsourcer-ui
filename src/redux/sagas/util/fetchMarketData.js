@@ -3,7 +3,7 @@
 import type Web3 from "web3";
 import type { MarketInfo } from "../../actions/types";
 import abiDecodeShortStringAsInt256 from "speedomatic/src/abi-decode-short-string-as-int256";
-import { Range as ImmRange } from "immutable";
+import { Range as ImmRange, List as ImmList, Map as ImmMap } from "immutable";
 import augurABI from "../../../abi/augur";
 import invariant from "invariant";
 import type { Addresses } from "../../../addresses";
@@ -43,6 +43,34 @@ async function fetchMarketData(
     SCALAR: () => ["(?0 scalar)", "(?1 scalar)"]
   }[marketCreationInfo.marketType]();
 
+  const outcomePayoutHashesArray = await Promise.all(
+    ImmList(ImmRange(0, outcomes.length))
+      .push(null)
+      .map(
+        async outcomeIndex =>
+          await market.methods
+            .derivePayoutDistributionHash(
+              ImmRange(0, outcomes.length)
+                .map(
+                  i =>
+                    outcomeIndex != null
+                      ? i === outcomeIndex
+                        ? numTicks
+                        : 0
+                      : Math.floor(numTicks / outcomes.length)
+                )
+                .map(n => web3.utils.toHex(n))
+                .toArray(),
+              outcomeIndex == null
+            )
+            .call()
+      )
+      .toArray()
+  );
+  const outcomePayoutHashes = ImmMap(
+    outcomePayoutHashesArray.map((hash, i) => [hash, i])
+  );
+
   const getParticipantInfo = async index => {
     const participantAddress = await market.methods
       .getReportingParticipant(index)
@@ -51,37 +79,18 @@ async function fetchMarketData(
       augurABI.DisputeCrowdsourcer,
       participantAddress
     );
-    const [size, invalid, payouts] = await Promise.all([
+    const [size, payoutDistributionHash] = await Promise.all([
       participant.methods.getSize().call(),
-      participant.methods.isInvalid().call(),
-      Promise.all(
-        ImmRange(0, outcomes.length)
-          .toArray()
-          .map(
-            async outcomeIndex =>
-              await participant.methods
-                .getPayoutNumerator(outcomeIndex)
-                .call()
-                .then(Number.parseInt)
-          )
-      )
+      participant.methods.getPayoutDistributionHash().call()
     ]);
+    const outcomeIndex = outcomePayoutHashes.get(payoutDistributionHash);
 
-    const outcome = invalid
-      ? ImmRange(0, outcomes.length)
-          .filter(
-            outcomeIndex =>
-              payouts[outcomeIndex] !== Math.floor(numTicks / outcomes.length)
-          )
-          .isEmpty()
-        ? { name: "INVALID", invalid: true }
-        : null
-      : (a =>
-          a.length === 1 ? { name: outcomes[a[0]], invalid: false } : null)(
-          ImmRange(0, outcomes.length)
-            .filter(outcomeIndex => payouts[outcomeIndex] !== 0)
-            .toArray()
-        );
+    const outcome =
+      outcomeIndex === null
+        ? null
+        : outcomeIndex === outcomes.length
+          ? { name: "INVALID", invalid: true }
+          : { name: outcomes[outcomeIndex], invalid: false };
 
     return {
       outcome: outcome,
@@ -93,6 +102,26 @@ async function fetchMarketData(
     ImmRange(0, numParticipants)
       .toArray()
       .map(async index => await getParticipantInfo(index))
+  );
+
+  const currentRoundCrowdsourcers = await Promise.all(
+    outcomePayoutHashesArray.map(
+      async hash =>
+        await market.methods
+          .getCrowdsourcer(hash)
+          .call()
+          .then(
+            crowdsourcer =>
+              web3.utils.toBN(crowdsourcer).eq(web3.utils.toBN(0))
+                ? "0"
+                : new web3.eth.Contract(
+                    augurABI.DisputeCrowdsourcer,
+                    crowdsourcer
+                  ).methods
+                    .getSize()
+                    .call()
+          )
+    )
   );
 
   const feeWindow = await market.methods
@@ -108,6 +137,7 @@ async function fetchMarketData(
     outcomes: outcomes,
     numTicks: numTicks,
     participants: participants,
+    currentRoundCrowdsourcers: currentRoundCrowdsourcers,
     isCrowdsourcing
   };
 }

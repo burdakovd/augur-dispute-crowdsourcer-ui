@@ -3,13 +3,11 @@
 import type Web3 from "web3";
 import type { Addresses } from "../../addresses";
 
-import { Map as ImmMap, Set as ImmSet } from "immutable";
+import { Map as ImmMap } from "immutable";
 import nullthrows from "nullthrows";
 import { fork, call, select, take, put, cancel } from "redux-saga/effects";
 import invariant from "invariant";
 import getContractAddresses from "../../addresses";
-import fetchMarketData from "./util/fetchMarketData";
-import getAugur from "./util/getAugur";
 import augurAbi from "../../abi/augur";
 import poolAbi from "../../abi/pool";
 import { getPublicWeb3 } from "./util/getWeb3";

@@ -44,7 +44,10 @@ const PoolPersonalAccountingCard = ({
                     </td>
                   </tr>
                   <tr>
-                    <td>Chosen fee</td>
+                    <td>
+                      Maximum acceptable fee (actual fee charged will likely be
+                      lower)
+                    </td>
                     <td>
                       {Number.parseInt(poolInfo.feeNumerator) / 10}% (+
                       <Amount

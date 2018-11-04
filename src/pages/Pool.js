@@ -39,9 +39,6 @@ class Pool extends Component<Props> {
                 }
                 marketInfo={this.props.info}
               />
-              <MarketCard id={this.props.match.params.market} />
-            </Col>
-            <Col sm={12} lg={6}>
               <DisputePoolCard
                 market={this.props.match.params.market}
                 round={Number.parseInt(this.props.match.params.round)}
@@ -52,6 +49,9 @@ class Pool extends Component<Props> {
                 }
                 marketInfo={this.props.info}
               />
+              <MarketCard id={this.props.match.params.market} />
+            </Col>
+            <Col sm={12} lg={6}>
               <PoolPersonalAccountingCard
                 market={this.props.match.params.market}
                 round={Number.parseInt(this.props.match.params.round)}

@@ -99,7 +99,7 @@ class Form extends Component<
           type="text"
           value={this.state.price}
           onChange={e => this.setState({ price: e.target.value })}
-          label="At most how much REP are you willing to pay per dispute token (between 1.0 and 1.5)"
+          label="At most how much REP are you willing to pay per dispute token (between 1.0 and 1.5), precision up to 0.001"
         />
         <Button
           disabled={!needApproval}

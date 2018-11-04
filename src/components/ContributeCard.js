@@ -33,9 +33,7 @@ const ContributeCard = ({
     poolInfo.state != null ? (
     <Panel bsStyle="primary">
       <Panel.Heading>
-        <Panel.Title componentClass="h3">
-          Contribute (from {personalAddress})
-        </Panel.Title>
+        <Panel.Title componentClass="h3">Contribute</Panel.Title>
       </Panel.Heading>
       <Panel.Body>
         {poolInfo.state.disputeTokens != null ? (

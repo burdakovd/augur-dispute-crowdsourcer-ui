@@ -216,7 +216,7 @@ function* monitor(
 
     return {
       rep: repBalance.toString(),
-      disputeToken:
+      disputeTokens:
         disputeTokensBalance == null ? null : disputeTokensBalance.toString()
     };
   };

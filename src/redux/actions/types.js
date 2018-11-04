@@ -32,6 +32,7 @@ export type PoolInfo = {|
 export type PersonalPoolInfo = {|
   contribution: string,
   feeNumerator: string,
+  REPWithdrawalLimit: string,
   hasWithdrawnProceeds: boolean
 |};
 

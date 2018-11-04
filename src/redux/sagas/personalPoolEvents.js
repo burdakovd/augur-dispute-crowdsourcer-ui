@@ -18,16 +18,24 @@ function* monitor(network: number, account: string, poolAddress: string): * {
       .call()
       .then(address => new web3.eth.Contract(poolAbi.Accounting, address))
   );
+  const REP = yield call(() =>
+    pool.methods
+      .getREP()
+      .call()
+      .then(address => new web3.eth.Contract(poolAbi.IERC20, address))
+  );
 
   const fetch = async () => {
     const [
       contribution,
       feeNumerator,
-      hasWithdrawnProceeds
+      hasWithdrawnProceeds,
+      REPWithdrawalLimit
     ] = await Promise.all([
       accounting.methods.m_contributionPerContributor(account).call(),
       accounting.methods.m_feeNumeratorPerContributor(account).call(),
-      pool.methods.m_proceedsCollected(account).call()
+      pool.methods.m_proceedsCollected(account).call(),
+      REP.methods.allowance(account, poolAddress).call()
     ]);
 
     return {
@@ -38,12 +46,13 @@ function* monitor(network: number, account: string, poolAddress: string): * {
       info: {
         contribution,
         feeNumerator,
-        hasWithdrawnProceeds
+        hasWithdrawnProceeds,
+        REPWithdrawalLimit
       }
     };
   };
 
-  const crowdsourcerLogsChannel = yield call(() =>
+  const channel = yield call(() =>
     eventChannel(emitter => {
       console.log("starting web3 subscription");
       const subscription = web3.eth.subscribe(
@@ -59,10 +68,25 @@ function* monitor(network: number, account: string, poolAddress: string): * {
           }
         }
       );
+      const subscription2 = web3.eth.subscribe(
+        "logs",
+        {
+          address: REP.options.address,
+          topics: [null, web3.utils.padLeft(account, 64)]
+        },
+        (e, r) => {
+          if (e) {
+            console.error(e);
+          } else {
+            emitter(nullthrows(r));
+          }
+        }
+      );
 
       return () => {
         console.log("closing web3 subscription");
         subscription.unsubscribe();
+        subscription2.unsubscribe();
       };
     })
   );
@@ -71,10 +95,10 @@ function* monitor(network: number, account: string, poolAddress: string): * {
     while (true) {
       const data = yield call(fetch);
       yield put(data);
-      yield take(crowdsourcerLogsChannel);
+      yield take(channel);
     }
   } finally {
-    crowdsourcerLogsChannel.close();
+    channel.close();
   }
 }
 

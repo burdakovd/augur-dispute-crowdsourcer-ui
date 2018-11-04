@@ -1,3 +1,11 @@
 .pool-page {
   margin: 1em;
 }
+
+.pool-page form {
+  margin: 1em;
+}
+
+.pool-page form button {
+  margin: 0.25em;
+}

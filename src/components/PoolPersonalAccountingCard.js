@@ -57,7 +57,7 @@ const PoolPersonalAccountingCard = ({
                     </td>
                   </tr>
                   <tr>
-                    <td>Have withdrawn proceeds (after dispute)</td>
+                    <td>Whether you have withdrawn proceeds (after dispute)</td>
                     <td>{poolInfo.hasWithdrawnProceeds ? "YES" : "NO"}</td>
                   </tr>
                 </tbody>

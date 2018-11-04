@@ -61,7 +61,7 @@ const DisputePoolCard = ({
                         })
                           .then(receipt =>
                             alert(
-                              `Transaction to create pool have been confirmed: ${
+                              `Transaction to create pool has been confirmed: ${
                                 receipt.transactionHash
                               }.`
                             )

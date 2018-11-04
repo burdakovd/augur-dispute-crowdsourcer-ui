@@ -8,6 +8,7 @@ import { Map as ImmMap } from "immutable";
 import { connect } from "react-redux";
 import type { State } from "../redux/state";
 import type { Dispatch, MarketInfo } from "../redux/actions/types";
+import ContributeCard from "../components/ContributeCard";
 import DisputePoolCard from "../components/DisputePoolCard";
 import DisputeSummaryCard from "../components/DisputeSummaryCard";
 import MarketCard from "../components/MarketCard";
@@ -51,6 +52,15 @@ class Pool extends Component<Props> {
                 marketInfo={this.props.info}
               />
               <PoolPersonalAccountingCard
+                market={this.props.match.params.market}
+                round={Number.parseInt(this.props.match.params.round)}
+                outcomeIndex={
+                  this.props.match.params.outcome != null
+                    ? Number.parseInt(this.props.match.params.outcome)
+                    : null
+                }
+              />
+              <ContributeCard
                 market={this.props.match.params.market}
                 round={Number.parseInt(this.props.match.params.round)}
                 outcomeIndex={

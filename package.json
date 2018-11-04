@@ -5,7 +5,7 @@
   "homepage": "./",
   "dependencies": {
     "augur-core": "^1.1.0",
-    "augur-dispute-crowdsourcer": "https://github.com/burdakovd/augur-dispute-crowdsourcer#9417c05554b3c8eecd2bf5baf6c9c7da6cfac19c",
+    "augur-dispute-crowdsourcer": "https://github.com/burdakovd/augur-dispute-crowdsourcer#1c1bb5d598e260684ab7f3913b5f4fd79fb54d0e",
     "augur.js": "^5.6.0",
     "debounce": "^1.2.0",
     "immutable": "FormAPI/immutable-js#v3.8.1-flow-fix",

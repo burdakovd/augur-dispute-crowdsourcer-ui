@@ -36,8 +36,6 @@ class Pool extends Component<Props> {
                 }
                 marketInfo={this.props.info}
               />
-            </Col>
-            <Col sm={12} lg={6}>
               <MarketCard id={this.props.match.params.market} />
             </Col>
             <Col sm={12} lg={6}>

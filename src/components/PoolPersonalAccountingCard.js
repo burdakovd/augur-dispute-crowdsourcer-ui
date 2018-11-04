@@ -54,7 +54,8 @@ const PoolPersonalAccountingCard = ({
                         size={Web3.utils
                           .toBN(poolInfo.contribution)
                           .mul(Web3.utils.toBN(poolInfo.feeNumerator))
-                          .div(Web3.utils.toBN(1000))}
+                          .div(Web3.utils.toBN(1000))
+                          .toString()}
                       />{" "}
                       REP)
                     </td>

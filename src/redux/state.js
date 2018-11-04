@@ -2,7 +2,12 @@
 
 import { Map as ImmMap } from "immutable";
 import type { Addresses } from "../addresses";
-import type { MarketInfo, SearchResults, PoolInfo } from "./actions/types";
+import type {
+  MarketInfo,
+  SearchResults,
+  PoolInfo,
+  PersonalPoolInfo
+} from "./actions/types";
 
 export type State = {|
   query: string,
@@ -11,7 +16,13 @@ export type State = {|
   searchResults: ImmMap<number, ImmMap<string, SearchResults>>,
   marketInfo: ImmMap<number, ImmMap<string, MarketInfo>>,
   contractAddresses: ImmMap<number, Addresses>,
-  poolInfo: ImmMap<string, PoolInfo>
+  poolInfo: ImmMap<string, PoolInfo>,
+  personalPoolInfo: ImmMap<
+    number,
+    // account, pool
+    ImmMap<string, ImmMap<string, PersonalPoolInfo>>
+  >,
+  personalAddress: ?string
 |};
 
 function getInitialState(): State {
@@ -22,7 +33,9 @@ function getInitialState(): State {
     searchResults: ImmMap(),
     marketInfo: ImmMap(),
     contractAddresses: ImmMap(),
-    poolInfo: ImmMap()
+    poolInfo: ImmMap(),
+    personalPoolInfo: ImmMap(),
+    personalAddress: null
   };
 }
 

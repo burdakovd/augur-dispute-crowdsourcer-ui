@@ -22,7 +22,7 @@ function reduce(state: State = getInitialState(), action: Action): State {
     return {
       ...state,
       searchResults: state.searchResults.update(network, m =>
-        (m || ImmMap()).update(query, _ => results)
+        (m || ImmMap()).set(query, results)
       )
     };
   } else if (action.type === "SEARCH_RESULTS_PROGRESS") {
@@ -35,7 +35,7 @@ function reduce(state: State = getInitialState(), action: Action): State {
     return {
       ...state,
       marketInfo: state.marketInfo.update(network, m =>
-        (m || ImmMap()).update(id, _ => info)
+        (m || ImmMap()).set(id, info)
       )
     };
   } else if (action.type === "GOT_CONTRACT_ADDRESSES") {
@@ -52,6 +52,19 @@ function reduce(state: State = getInitialState(), action: Action): State {
     return {
       ...state,
       poolInfo: state.poolInfo.set(key, info)
+    };
+  } else if (action.type === "GOT_PERSONAL_ADDRESS") {
+    return {
+      ...state,
+      personalAddress: action.address
+    };
+  } else if (action.type === "GOT_PERSONAL_POOL_INFO") {
+    const { network, account, pool, info } = action;
+    return {
+      ...state,
+      personalPoolInfo: state.personalPoolInfo.update(network, m =>
+        (m || ImmMap()).update(account, m => (m || ImmMap()).set(pool, info))
+      )
     };
   }
 

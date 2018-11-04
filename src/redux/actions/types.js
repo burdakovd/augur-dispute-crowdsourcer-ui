@@ -29,6 +29,11 @@ export type PoolInfo = {|
     disputeTokens: ?string
   |}
 |};
+export type PersonalPoolInfo = {|
+  contribution: string,
+  feeNumerator: string,
+  hasWithdrawnProceeds: boolean
+|};
 
 export type Action =
   | { type: "SEARCH_QUERY_CHANGED", query: string }
@@ -83,6 +88,32 @@ export type Action =
       round: number,
       outcome: ?number,
       info: PoolInfo
+    }
+  | {
+      type: "NEED_PERSONAL_ADDRESS"
+    }
+  | {
+      type: "GOT_PERSONAL_ADDRESS",
+      address: string
+    }
+  | {
+      type: "SUBSCRIBE_PERSONAL_POOL_EVENTS",
+      network: number,
+      account: string,
+      pool: string
+    }
+  | {
+      type: "UNSUBSCRIBE_PERSONAL_POOL_EVENTS",
+      network: number,
+      account: string,
+      pool: string
+    }
+  | {
+      type: "GOT_PERSONAL_POOL_INFO",
+      network: number,
+      account: string,
+      pool: string,
+      info: PersonalPoolInfo
     };
 
 export type Dispatch = (action: Action) => any;

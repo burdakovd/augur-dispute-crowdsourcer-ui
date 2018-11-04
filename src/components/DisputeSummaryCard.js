@@ -48,7 +48,7 @@ const DisputeSummaryCard = ({
           )}{" "}
         </Panel.Title>
       </Panel.Heading>
-      <Table bordered className="dispute-round-details">
+      <Table bordered>
         <tbody>
           <tr>
             <td>Round start time</td>

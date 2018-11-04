@@ -8,6 +8,7 @@ export type SearchResults = ImmList<string>;
 export type MarketInfo = {|
   name: string,
   marketType: string,
+  numTicks: number,
   outcomes: Array<string>,
   participants: Array<{
     outcome: ?{
@@ -21,7 +22,8 @@ export type MarketInfo = {|
 export type PoolInfo = {|
   address: string,
   startTime: number,
-  endTime: number
+  endTime: number,
+  feeWindowID: number
 |};
 
 export type Action =

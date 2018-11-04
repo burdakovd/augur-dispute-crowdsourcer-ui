@@ -106,6 +106,7 @@ async function fetchMarketData(
     name: marketCreationInfo.description,
     marketType: marketCreationInfo.marketType,
     outcomes: outcomes,
+    numTicks: numTicks,
     participants: participants,
     isCrowdsourcing
   };

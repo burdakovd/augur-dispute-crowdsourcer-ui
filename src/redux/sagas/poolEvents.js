@@ -6,6 +6,7 @@ import type { Addresses } from "../../addresses";
 import { Map as ImmMap } from "immutable";
 import nullthrows from "nullthrows";
 import { fork, call, select, take, put, cancel } from "redux-saga/effects";
+import { eventChannel } from "redux-saga";
 import invariant from "invariant";
 import getContractAddresses from "../../addresses";
 import augurAbi from "../../abi/augur";
@@ -94,14 +95,14 @@ function* monitor(
       )
       .toNumber();
   });
+  const feeWindowID =
+    feeWindowStartTime / Number.parseInt(disputeRoundDuration);
 
   const getPoolAddress = async () => {
     return await factory.methods
       .maybeGetCrowdsourcer(
         market,
-        web3.utils.toHex(
-          feeWindowStartTime / Number.parseInt(disputeRoundDuration)
-        ),
+        web3.utils.toHex(feeWindowID),
         marketInfo.outcomes
           .map(
             (_, i) =>
@@ -117,23 +118,67 @@ function* monitor(
       .call();
   };
 
-  while (true) {
-    const address = yield call(getPoolAddress);
+  var address = yield call(getPoolAddress);
 
-    yield put({
-      type: "GOT_POOL_INFO",
-      network,
-      round,
-      market,
-      outcome,
-      info: {
-        address,
-        startTime: feeWindowStartTime,
-        endTime: feeWindowStartTime + Number.parseInt(disputeRoundDuration)
-      }
-    });
+  yield put({
+    type: "GOT_POOL_INFO",
+    network,
+    round,
+    market,
+    outcome,
+    info: {
+      address,
+      startTime: feeWindowStartTime,
+      endTime: feeWindowStartTime + Number.parseInt(disputeRoundDuration),
+      feeWindowID
+    }
+  });
 
-    break;
+  const factoryLogsChannel = yield call(() =>
+    eventChannel(emitter => {
+      console.log("starting web3 subscription");
+      const subscription = web3.eth.subscribe(
+        "logs",
+        {
+          address: nullthrows(factory.options.address)
+        },
+        (e, r) => {
+          if (e) {
+            console.error(e);
+          } else {
+            emitter(nullthrows(r));
+          }
+        }
+      );
+
+      return () => {
+        console.log("closing web3 subscription");
+        subscription.unsubscribe();
+      };
+    })
+  );
+
+  try {
+    while (web3.utils.toBN(address).eq(web3.utils.toBN(0))) {
+      // wait for events
+      yield take(factoryLogsChannel);
+      address = yield call(getPoolAddress);
+      yield put({
+        type: "GOT_POOL_INFO",
+        network,
+        round,
+        market,
+        outcome,
+        info: {
+          address,
+          startTime: feeWindowStartTime,
+          endTime: feeWindowStartTime + Number.parseInt(disputeRoundDuration),
+          feeWindowID
+        }
+      });
+    }
+  } finally {
+    factoryLogsChannel.close();
   }
 }
 

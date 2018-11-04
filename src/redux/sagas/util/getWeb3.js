@@ -30,11 +30,11 @@ async function getPublicWeb3(network: number): Promise<Web3> {
   }
 
   publicCache[network] = new Web3(
-    new Web3.providers.HttpProvider(
+    new Web3.providers.WebsocketProvider(
       nullthrows(
         {
-          "1": "https://mainnet.infura.io/augur",
-          "4": "https://rinkeby.infura.io/augur"
+          "1": "wss://mainnet.infura.io/ws",
+          "4": "wss://rinkeby.infura.io/ws"
         }[`${network}`]
       )
     )
@@ -50,7 +50,10 @@ async function getPersonalWeb3(): Promise<Web3> {
   await waitForDocumentLoad();
 
   // Checking if Web3 has been injected by the browser (Mist/MetaMask)
-  if (typeof window.web3 !== "undefined") {
+  if (typeof window.ethereum !== "undefined") {
+    // Use new MetaMask's provider
+    personalCache = new Web3(window.ethereum);
+  } else if (typeof window.web3 !== "undefined") {
     // Use Mist/MetaMask's provider
     personalCache = new Web3(window.web3.currentProvider);
   } else {

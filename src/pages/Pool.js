@@ -13,6 +13,7 @@ import DisputePoolCard from "../components/DisputePoolCard";
 import DisputeSummaryCard from "../components/DisputeSummaryCard";
 import MarketCard from "../components/MarketCard";
 import PoolPersonalAccountingCard from "../components/PoolPersonalAccountingCard";
+import WithdrawCard from "../components/WithdrawCard";
 import "./Pool.css";
 
 type Props = {| info: MarketInfo, match: *, requestInfo: () => void |};
@@ -61,6 +62,15 @@ class Pool extends Component<Props> {
                 }
               />
               <ContributeCard
+                market={this.props.match.params.market}
+                round={Number.parseInt(this.props.match.params.round)}
+                outcomeIndex={
+                  this.props.match.params.outcome != null
+                    ? Number.parseInt(this.props.match.params.outcome)
+                    : null
+                }
+              />
+              <WithdrawCard
                 market={this.props.match.params.market}
                 round={Number.parseInt(this.props.match.params.round)}
                 outcomeIndex={

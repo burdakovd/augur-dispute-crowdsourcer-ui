@@ -33,14 +33,14 @@ const CollectFeesCard = ({
       </Panel.Heading>
       <Panel.Body>
         {poolInfo.state.disputeTokensAddress == null ? (
-          <p>Dispute hasn't happened yet, so can't collect proceeds.</p>
+          <p>Dispute hasn't happened yet, so can't collect fees.</p>
         ) : poolInfo.state.collectedFees ? (
           <p>Fees have already been collected. You can't do it twice.</p>
         ) : (
           <div>
             <p>
-              Trigger fees collection. 90% of fees will be received by lucky
-              person who triggered the dispute (
+              Trigger fees collection. 90% of fees will be received by lucky dog
+              who triggered the dispute (
               <AddressLink
                 network={network}
                 address={poolInfo.state.executor}

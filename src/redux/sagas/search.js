@@ -115,7 +115,7 @@ function* handleSearchQuery(): * {
 
     // setting the limit low to make fetching data for each result
     // less stressful
-    const LIMIT = 3;
+    const LIMIT = 5;
 
     yield put({
       type: "SEARCH_RESULTS",

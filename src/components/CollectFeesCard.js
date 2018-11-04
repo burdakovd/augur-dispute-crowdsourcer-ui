@@ -35,7 +35,12 @@ const CollectFeesCard = ({
         {poolInfo.state.disputeTokensAddress == null ? (
           <p>Dispute hasn't happened yet, so can't collect fees.</p>
         ) : poolInfo.state.collectedFees ? (
-          <p>Fees have already been collected. You can't do it twice.</p>
+          <p>
+            Fees have already been collected. You can't do it twice. 90% of fees
+            went to lucky dog who triggered the dispute (
+            <AddressLink network={network} address={poolInfo.state.executor} />
+            ), and 10% to contract author.
+          </p>
         ) : (
           <div>
             <p>

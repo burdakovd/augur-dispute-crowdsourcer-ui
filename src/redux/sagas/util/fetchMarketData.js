@@ -118,7 +118,7 @@ async function fetchMarketData(
                     augurABI.DisputeCrowdsourcer,
                     crowdsourcer
                   ).methods
-                    .getSize()
+                    .totalSupply()
                     .call()
           )
     )

@@ -27,7 +27,9 @@ export type PoolInfo = {|
   state: ?{|
     rep: string,
     disputeTokensAddress: ?string,
-    disputeTokens: ?string
+    disputeTokens: ?string,
+    executor: string,
+    collectedFees: boolean
   |}
 |};
 export type PersonalPoolInfo = {|

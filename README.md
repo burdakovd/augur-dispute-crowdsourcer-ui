@@ -4,6 +4,8 @@ UI for https://github.com/burdakovd/augur-dispute-crowdsourcer (more docs there)
 
 ---
 
+Latest version: https://dispute.tools/
+
 Releases:
  - v0.1:
    - build logs (verify IPFS hash there in the logs): https://travis-ci.com/burdakovd/augur-dispute-crowdsourcer-ui/builds/90200100

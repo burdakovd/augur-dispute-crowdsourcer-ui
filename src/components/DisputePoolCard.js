@@ -124,6 +124,42 @@ const DisputePoolCard = ({
               )}
             </td>
           </tr>
+          <tr>
+            <td>Pool participants contributed overall (REP)</td>
+            <td>
+              {poolInfo != null ? (
+                Web3.utils.toBN(poolInfo.address).eq(Web3.utils.toBN(0)) ? (
+                  "(need to create pool first)"
+                ) : poolInfo.state != null ? (
+                  <span>
+                    <Amount size={poolInfo.state.contributions} /> REP
+                  </span>
+                ) : (
+                  "loading..."
+                )
+              ) : (
+                "loading..."
+              )}
+            </td>
+          </tr>
+          <tr>
+            <td>Pool participants offered fees overall (REP)</td>
+            <td>
+              {poolInfo != null ? (
+                Web3.utils.toBN(poolInfo.address).eq(Web3.utils.toBN(0)) ? (
+                  "(need to create pool first)"
+                ) : poolInfo.state != null ? (
+                  <span>
+                    <Amount size={poolInfo.state.offeredFees} /> REP
+                  </span>
+                ) : (
+                  "loading..."
+                )
+              ) : (
+                "loading..."
+              )}
+            </td>
+          </tr>
         </tbody>
       </Table>
     </Panel>

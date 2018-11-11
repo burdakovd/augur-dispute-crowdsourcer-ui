@@ -185,6 +185,12 @@ function* monitor(
       .call()
       .then(address => new web3.eth.Contract(poolAbi.IERC20, address))
   );
+  const accounting = yield call(() =>
+    pool.methods
+      .getAccounting()
+      .call()
+      .then(address => new web3.eth.Contract(poolAbi.Accounting, address))
+  );
   const disputerAddress = yield call(() => pool.methods.getDisputer().call());
 
   const getBalances = async () => {
@@ -193,7 +199,9 @@ function* monitor(
       repDisputer,
       hasDisputed,
       hasCollectedFees,
-      executorAddress
+      executorAddress,
+      contributions,
+      offeredFees
     ] = await Promise.all([
       REP.methods.balanceOf(pool.options.address).call(),
       REP.methods.balanceOf(disputerAddress).call(),
@@ -201,7 +209,9 @@ function* monitor(
       pool.methods.m_feesCollected().call(),
       new web3.eth.Contract(poolAbi.Disputer, disputerAddress).methods
         .m_feeReceiver()
-        .call()
+        .call(),
+      accounting.methods.getTotalContribution().call(),
+      accounting.methods.getTotalFeesOffered().call()
     ]);
 
     const repBalance = web3.utils
@@ -232,7 +242,9 @@ function* monitor(
         disputeTokensBalance == null ? null : disputeTokensBalance.toString(),
       disputeTokensAddress,
       collectedFees: hasCollectedFees,
-      executor: executorAddress
+      executor: executorAddress,
+      contributions,
+      offeredFees
     };
   };
 

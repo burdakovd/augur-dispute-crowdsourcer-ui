@@ -46,7 +46,14 @@ const DisputeCard = ({
             <Form
               poolAddress={poolAddress}
               account={personalAddress}
-              rep={nullthrows(poolInfo.state).rep}
+              rep={nullthrows(poolInfo.state).projectedFundsUsed}
+              fees={Web3.utils
+                .toBN(nullthrows(poolInfo.state).projectedFeeNumerator)
+                .mul(
+                  Web3.utils.toBN(nullthrows(poolInfo.state).projectedFundsUsed)
+                )
+                .div(Web3.utils.toBN(1000))
+                .toString()}
             />
           </div>
         )}
@@ -56,7 +63,7 @@ const DisputeCard = ({
 };
 
 class Form extends Component<
-  { poolAddress: string, account: string, rep: string },
+  { poolAddress: string, account: string, rep: string, fees: string },
   *
 > {
   render() {
@@ -81,7 +88,8 @@ class Form extends Component<
               })
           }
         >
-          Run dispute (pool has <Amount size={this.props.rep} /> REP)
+          Run dispute with <Amount size={this.props.rep} /> REP (collect{" "}
+          <Amount size={this.props.fees} /> REP in fees)
         </Button>
       </form>
     );

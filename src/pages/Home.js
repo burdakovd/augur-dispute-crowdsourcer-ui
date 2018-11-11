@@ -2,6 +2,7 @@
 
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
+import Button from "react-bootstrap/lib/Button";
 import FormGroup from "react-bootstrap/lib/FormGroup";
 import FormControl from "react-bootstrap/lib/FormControl";
 import nullthrows from "nullthrows";
@@ -15,10 +16,12 @@ import "./Home.css";
 
 type SearchParams = {|
   query: string,
+  numShown: number,
   network: ?string,
   progress: number,
   results: ?SearchResults,
-  onQueryUpdated: string => void
+  onQueryUpdated: string => void,
+  onMoreRequested: () => void
 |};
 
 class SearchPage extends Component<SearchParams> {
@@ -51,7 +54,11 @@ class SearchPage extends Component<SearchParams> {
         <div className="Home-search-results">
           {this.props.results ? (
             this.props.results.size ? (
-              <Markets markets={this.props.results} />
+              <Markets
+                markets={this.props.results}
+                numShown={this.props.numShown}
+                onMoreRequested={this.props.onMoreRequested}
+              />
             ) : (
               "No markets found for the query"
             )
@@ -68,10 +75,18 @@ class SearchPage extends Component<SearchParams> {
   }
 }
 
-const Markets = ({ markets }) => {
+const Markets = ({ markets, numShown, onMoreRequested }) => {
   return (
     <div>
-      {markets.map((id, index) => <MarketCard key={index} id={id} />).toArray()}
+      <div>
+        {markets
+          .slice(0, numShown)
+          .map((id, index) => <MarketCard key={index} id={id} />)
+          .toArray()}
+      </div>
+      {markets.size > numShown ? (
+        <Button onClick={onMoreRequested}>Load more...</Button>
+      ) : null}
     </div>
   );
   // TODO: could fetch more on scrolling
@@ -79,6 +94,7 @@ const Markets = ({ markets }) => {
 
 const mapStateToProps: State => * = (state: State) => ({
   query: state.query,
+  numShown: state.searchResultsShown,
   network: state.network,
   results:
     state.network == null
@@ -93,6 +109,11 @@ const mapDispatchToProps: Dispatch => * = (dispatch: Dispatch) => {
       dispatch({
         type: "SEARCH_QUERY_CHANGED",
         query: newQuery
+      });
+    },
+    onMoreRequested: () => {
+      dispatch({
+        type: "MORE_RESULTS_REQUESTED"
       });
     }
   };

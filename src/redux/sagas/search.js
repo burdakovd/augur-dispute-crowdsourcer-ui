@@ -113,10 +113,6 @@ function* handleSearchQuery(): * {
       return merged;
     };
 
-    // setting the limit low to make fetching data for each result
-    // less stressful
-    const LIMIT = 5;
-
     yield put({
       type: "SEARCH_RESULTS",
       network,
@@ -124,7 +120,7 @@ function* handleSearchQuery(): * {
       results: merge([
         Web3.utils.isAddress(query) ? [query] : [],
         ...extraMarkets
-      ]).take(LIMIT)
+      ])
     });
   } finally {
     yield cancel(progressReporter);

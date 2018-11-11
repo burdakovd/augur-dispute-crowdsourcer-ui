@@ -11,6 +11,7 @@ import type {
 
 export type State = {|
   query: string,
+  searchResultsShown: number,
   network: ?number,
   searchResultsProgress: number,
   searchResults: ImmMap<number, ImmMap<string, SearchResults>>,
@@ -25,9 +26,14 @@ export type State = {|
   personalAddress: ?string
 |};
 
+export function getDefaultSearchResultsShown(): number {
+  return 3;
+}
+
 function getInitialState(): State {
   return {
     query: "",
+    searchResultsShown: getDefaultSearchResultsShown(),
     searchResultsProgress: 0,
     network: null,
     searchResults: ImmMap(),

@@ -48,6 +48,7 @@ export type PersonalPoolInfo = {|
 
 export type Action =
   | { type: "SEARCH_QUERY_CHANGED", query: string }
+  | { type: "MORE_RESULTS_REQUESTED" }
   | {
       type: "NETWORK_CHANGED",
       id: number
@@ -61,6 +62,7 @@ export type Action =
       type: "SEARCH_RESULTS",
       network: number,
       query: string,
+      shown: number,
       results: SearchResults
     }
   | {

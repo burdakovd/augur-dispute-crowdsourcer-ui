@@ -3,13 +3,19 @@
 import type { State } from "./state";
 import type { Action } from "./actions/types";
 import { Map as ImmMap } from "immutable";
-import getInitialState from "./state";
+import getInitialState, { getDefaultSearchResultsShown } from "./state";
 
 function reduce(state: State = getInitialState(), action: Action): State {
   if (action.type === "SEARCH_QUERY_CHANGED") {
     return {
       ...state,
-      query: action.query
+      query: action.query,
+      searchResultsShown: getDefaultSearchResultsShown()
+    };
+  } else if (action.type === "MORE_RESULTS_REQUESTED") {
+    return {
+      ...state,
+      searchResultsShown: state.searchResultsShown + 3
     };
   } else if (action.type === "NETWORK_CHANGED") {
     return {

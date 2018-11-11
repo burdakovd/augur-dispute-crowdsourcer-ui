@@ -76,9 +76,15 @@ const DisputeSummaryCard = ({
             <td>
               {marketInfo != null ? (
                 round < marketInfo.participants.length ? (
-                  <span>
-                    <Amount size={marketInfo.participants[round].size} /> REP
-                  </span>
+                  isOurParticipant(marketInfo.participants[round]) ? (
+                    <span>
+                      <Amount size={marketInfo.participants[round].size} /> REP
+                    </span>
+                  ) : (
+                    <em>
+                      (unknown/irrelevant, this is past round that did not win)
+                    </em>
+                  )
                 ) : round === marketInfo.participants.length ? (
                   <span>
                     <Amount
@@ -110,9 +116,15 @@ const DisputeSummaryCard = ({
             <td>
               {marketInfo != null ? (
                 round < marketInfo.participants.length ? (
-                  <span>
-                    <Amount size={marketInfo.participants[round].size} /> REP
-                  </span>
+                  isOurParticipant(marketInfo.participants[round]) ? (
+                    <span>
+                      <Amount size={marketInfo.participants[round].size} /> REP
+                    </span>
+                  ) : (
+                    <em>
+                      (unknown/irrelevant, this is past round that did not win)
+                    </em>
+                  )
                 ) : round === marketInfo.participants.length &&
                 marketInfo.isCrowdsourcing ? (
                   <span>

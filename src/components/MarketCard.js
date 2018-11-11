@@ -11,6 +11,7 @@ import Button from "react-bootstrap/lib/Button";
 import Panel from "react-bootstrap/lib/Panel";
 import Table from "react-bootstrap/lib/Table";
 import { connect } from "react-redux";
+import Web3 from "web3";
 import Amount from "./Amount";
 import MarketName from "./MarketName";
 
@@ -79,6 +80,22 @@ const DisputeRounds = ({ id, outcomeIndex, outcome, info }) => {
     outcome.invalid === participant.outcome.invalid &&
     outcome.name === participant.outcome.name;
 
+  const sizeIfCurrentCrowdsourcer = () =>
+    info.participants
+      .map(p => Web3.utils.toBN(p.size))
+      .reduce((x, y) => x.add(y), Web3.utils.toBN(0))
+      .mul(Web3.utils.toBN(2))
+      .sub(
+        info.participants
+          .filter(isOurParticipant)
+          .map(p => Web3.utils.toBN(p.size))
+          .reduce((x, y) => x.add(y), Web3.utils.toBN(0))
+          .mul(Web3.utils.toBN(3))
+      );
+
+  const isTentativeWinning = () =>
+    sizeIfCurrentCrowdsourcer().lte(Web3.utils.toBN(0));
+
   // TODO: show max size (for current round and others)
   // TODO: hightlight inability to dispute for winning outcome
   return (
@@ -94,31 +111,37 @@ const DisputeRounds = ({ id, outcomeIndex, outcome, info }) => {
             placement="top"
             overlay={
               <Tooltip id="tooltip">
-                contribution:{" "}
                 {participant != null ? (
-                  <span>
-                    filled{" "}
-                    <Amount
-                      size={
-                        isOurParticipant(participant) ? participant.size : "0"
-                      }
-                    />{" "}
-                    REP
-                  </span>
-                ) : i < info.participants.length ? (
-                  isOurParticipant(nullthrows(participant)) ? (
-                    "filled"
+                  isOurParticipant(participant) ? (
+                    <span>
+                      Completed round, filled <Amount size={participant.size} />{" "}
+                      REP
+                    </span>
                   ) : (
-                    "not filled"
+                    <span>Completed round, this outcome did not fill</span>
                   )
                 ) : i === info.participants.length ? (
-                  info.isCrowdsourcing ? (
-                    "crowdsourcing now"
+                  isTentativeWinning() ? (
+                    "This is tentative winning outcome, can't dispute for it in this round"
+                  ) : info.isCrowdsourcing ? (
+                    <span>
+                      Round is being filled now, filled{" "}
+                      <Amount
+                        size={info.currentRoundCrowdsourcers[outcomeIndex]}
+                      />{" "}
+                      REP out of{" "}
+                      <Amount size={sizeIfCurrentCrowdsourcer().toString()} />{" "}
+                      REP
+                    </span>
                   ) : (
-                    "will start crowdsourcing next round"
+                    <span>
+                      Round will open in the next dispute window, will accept{" "}
+                      <Amount size={sizeIfCurrentCrowdsourcer().toString()} />{" "}
+                      REP
+                    </span>
                   )
                 ) : (
-                  "may start crowdsourcing in the future"
+                  "May start crowdsourcing in the future, if the previous rounds fill"
                 )}
               </Tooltip>
             }
@@ -137,9 +160,11 @@ const DisputeRounds = ({ id, outcomeIndex, outcome, info }) => {
                       ? "success"
                       : undefined
                     : i === info.participants.length
-                      ? info.isCrowdsourcing
-                        ? "warning"
-                        : "primary"
+                      ? isTentativeWinning()
+                        ? undefined
+                        : info.isCrowdsourcing
+                          ? "warning"
+                          : "primary"
                       : "link"
                 }
               >

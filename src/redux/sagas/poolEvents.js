@@ -69,6 +69,13 @@ function* monitor(
     }
   }
 
+  const isOurParticipant = participant =>
+    participant.outcome != null &&
+    (participant.outcome.invalid
+      ? outcome == null
+      : outcome != null &&
+        participant.outcome.name === marketInfo.outcomes[outcome]);
+
   const feeWindowStartTime = yield call(async () => {
     const feeWindowAddress = await new web3.eth.Contract(
       augurAbi.Market,
@@ -194,24 +201,114 @@ function* monitor(
   const disputerAddress = yield call(() => pool.methods.getDisputer().call());
 
   const getBalances = async () => {
+    const [repDisputer, hasDisputed, hasFinalized] = await Promise.all([
+      REP.methods.balanceOf(disputerAddress).call(),
+      pool.methods.hasDisputed().call(),
+      pool.methods.isFinalized().call()
+    ]);
+
     const [
       repCrowdsourcer,
-      repDisputer,
-      hasDisputed,
       hasCollectedFees,
       executorAddress,
       contributions,
-      offeredFees
+      offeredFees,
+      [
+        projectedFundsUsed,
+        projectedFeeNumerator,
+        projectedBoundaryParticipationNumerator,
+        projectedBoundaryParticipationDenominator
+      ]
     ] = await Promise.all([
       REP.methods.balanceOf(pool.options.address).call(),
-      REP.methods.balanceOf(disputerAddress).call(),
-      pool.methods.hasDisputed().call(),
       pool.methods.m_feesCollected().call(),
       new web3.eth.Contract(poolAbi.Disputer, disputerAddress).methods
         .m_feeReceiver()
         .call(),
       accounting.methods.getTotalContribution().call(),
-      accounting.methods.getTotalFeesOffered().call()
+      accounting.methods.getTotalFeesOffered().call(),
+      (async () => {
+        const {
+          fundsUsed,
+          feeNumerator,
+          fundsUsedFromBoundaryBucket
+        } = await (async () => {
+          if (hasFinalized) {
+            const [
+              fundsUsed,
+              feeNumerator,
+              fundsUsedFromBoundaryBucket
+            ] = await Promise.all([
+              accounting.methods.m_fundsUsed().call(),
+              accounting.methods.m_boundaryFeeNumerator().call(),
+              accounting.methods.m_fundsUsedFromBoundaryBucket().call()
+            ]);
+            return { fundsUsed, feeNumerator, fundsUsedFromBoundaryBucket };
+          }
+
+          const fundsUsed = await (hasDisputed
+            ? pool.methods
+                .getDisputeToken()
+                .call()
+                .then(address => new web3.eth.Contract(poolAbi.IERC20, address))
+                .then(
+                  async token =>
+                    await token.methods.balanceOf(disputerAddress).call()
+                )
+            : (async () => {
+                if (round < marketInfo.participants.length) {
+                  return "0";
+                }
+
+                const poolSize = marketInfo.participants
+                  .map(p => web3.utils.toBN(p.size))
+                  .reduce((x, y) => x.add(y), web3.utils.toBN(0))
+                  .mul(web3.utils.toBN(2))
+                  .sub(
+                    marketInfo.participants
+                      .filter(isOurParticipant)
+                      .map(p => web3.utils.toBN(p.size))
+                      .reduce((x, y) => x.add(y), web3.utils.toBN(0))
+                      .mul(web3.utils.toBN(3))
+                  );
+
+                const currentContribution =
+                  round === marketInfo.participants.length
+                    ? web3.utils.toBN(
+                        marketInfo.currentRoundCrowdsourcers[
+                          outcome == null ? marketInfo.outcomes.length : outcome
+                        ]
+                      )
+                    : web3.utils.toBN(0);
+
+                const poolCanAccept = (n =>
+                  n.gt(web3.utils.toBN(0)) ? n : web3.utils.toBN(0))(
+                  poolSize.sub(currentContribution).sub(web3.utils.toBN(1))
+                );
+
+                return poolCanAccept.gt(web3.utils.toBN(repDisputer))
+                  ? repDisputer
+                  : poolCanAccept.toString();
+              })());
+
+          const {
+            feeNumerator,
+            fundsUsedFromBoundaryBucket
+          } = await accounting.methods.getProjectedFee(fundsUsed).call();
+          return { fundsUsed, feeNumerator, fundsUsedFromBoundaryBucket };
+        })();
+
+        const fundsInBoundaryBucket = await accounting.methods.m_contributionPerFeeNumerator(
+          feeNumerator
+        );
+
+        return [
+          fundsUsed,
+          feeNumerator,
+          fundsUsedFromBoundaryBucket,
+          fundsInBoundaryBucket
+        ];
+      })()
     ]);
 
     const repBalance = web3.utils
@@ -244,7 +341,11 @@ function* monitor(
       collectedFees: hasCollectedFees,
       executor: executorAddress,
       contributions,
-      offeredFees
+      offeredFees,
+      projectedFundsUsed,
+      projectedFeeNumerator,
+      projectedBoundaryParticipationNumerator,
+      projectedBoundaryParticipationDenominator
     };
   };
 

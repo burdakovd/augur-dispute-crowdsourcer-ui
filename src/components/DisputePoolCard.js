@@ -160,6 +160,69 @@ const DisputePoolCard = ({
               )}
             </td>
           </tr>
+          <tr>
+            <td>
+              Amount of funds used for dispute{" "}
+              {poolInfo != null &&
+              poolInfo.state != null &&
+              poolInfo.state.disputeTokensAddress != null
+                ? ""
+                : "(projected)"}
+            </td>
+            <td>
+              {poolInfo != null ? (
+                Web3.utils.toBN(poolInfo.address).eq(Web3.utils.toBN(0)) ? (
+                  "(need to create pool first)"
+                ) : poolInfo.state != null ? (
+                  <span>
+                    <Amount size={poolInfo.state.projectedFundsUsed} /> REP
+                  </span>
+                ) : (
+                  "loading..."
+                )
+              ) : (
+                "loading..."
+              )}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Fee charged{" "}
+              {poolInfo != null &&
+              poolInfo.state != null &&
+              poolInfo.state.disputeTokensAddress != null
+                ? ""
+                : "(projected)"}
+            </td>
+            <td>
+              {poolInfo != null ? (
+                Web3.utils.toBN(poolInfo.address).eq(Web3.utils.toBN(0)) ? (
+                  "(need to create pool first)"
+                ) : poolInfo.state != null ? (
+                  <span>
+                    {Number.parseInt(poolInfo.state.projectedFeeNumerator) / 10}
+                    %,{" "}
+                    <Amount
+                      size={Web3.utils
+                        .toBN(nullthrows(poolInfo.state).projectedFeeNumerator)
+                        .mul(
+                          Web3.utils.toBN(
+                            nullthrows(poolInfo.state).projectedFundsUsed
+                          )
+                        )
+                        .divn(Web3.utils.toBN(1000))
+                        .toString()}
+                    />{" "}
+                    REP overall
+                  </span>
+                ) : (
+                  "loading..."
+                )
+              ) : (
+                "loading..."
+              )}
+            </td>
+          </tr>
         </tbody>
       </Table>
     </Panel>

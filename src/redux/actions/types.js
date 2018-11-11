@@ -32,7 +32,11 @@ export type PoolInfo = {|
     disputeTokensAddress: ?string,
     disputeTokens: ?string,
     executor: string,
-    collectedFees: boolean
+    collectedFees: boolean,
+    projectedFundsUsed: string,
+    projectedFeeNumerator: string,
+    projectedBoundaryParticipationNumerator: string,
+    projectedBoundaryParticipationDenominator: string
   |}
 |};
 export type PersonalPoolInfo = {|

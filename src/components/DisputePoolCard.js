@@ -210,7 +210,7 @@ const DisputePoolCard = ({
                             nullthrows(poolInfo.state).projectedFundsUsed
                           )
                         )
-                        .divn(Web3.utils.toBN(1000))
+                        .div(Web3.utils.toBN(1000))
                         .toString()}
                     />{" "}
                     REP overall

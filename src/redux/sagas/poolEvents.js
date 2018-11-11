@@ -298,9 +298,9 @@ function* monitor(
           return { fundsUsed, feeNumerator, fundsUsedFromBoundaryBucket };
         })();
 
-        const fundsInBoundaryBucket = await accounting.methods.m_contributionPerFeeNumerator(
-          feeNumerator
-        );
+        const fundsInBoundaryBucket = await accounting.methods
+          .m_contributionPerFeeNumerator(feeNumerator)
+          .call();
 
         return [
           fundsUsed,

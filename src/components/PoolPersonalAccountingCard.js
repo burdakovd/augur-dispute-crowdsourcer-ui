@@ -5,7 +5,11 @@ import React, { Fragment, Component } from "react";
 import Panel from "react-bootstrap/lib/Panel";
 import Table from "react-bootstrap/lib/Table";
 import { Map as ImmMap } from "immutable";
-import type { Dispatch, PersonalPoolInfo } from "../redux/actions/types";
+import type {
+  Dispatch,
+  PersonalPoolInfo,
+  PoolInfo
+} from "../redux/actions/types";
 import type { State } from "../redux/state";
 import { connect } from "react-redux";
 import Web3 from "web3";
@@ -14,11 +18,13 @@ import Amount from "./Amount";
 const PoolPersonalAccountingCard = ({
   personalAddress,
   poolAddress,
-  poolInfo
+  poolInfo,
+  globalPoolInfo
 }: {
   personalAddress: ?string,
   poolAddress: ?string,
-  poolInfo: ?PersonalPoolInfo
+  poolInfo: ?PersonalPoolInfo,
+  globalPoolInfo: ?PoolInfo
 }) => {
   return (
     <Fragment>
@@ -31,7 +37,7 @@ const PoolPersonalAccountingCard = ({
                 Your contribution ({personalAddress})
               </Panel.Title>
             </Panel.Heading>
-            {poolInfo == null ? null : (
+            {globalPoolInfo == null || poolInfo == null ? null : (
               <Table bordered>
                 <tbody>
                   <tr>
@@ -58,6 +64,88 @@ const PoolPersonalAccountingCard = ({
                           .toString()}
                       />{" "}
                       REP)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Amount from your contribution used for dispute{" "}
+                      {globalPoolInfo != null &&
+                      globalPoolInfo.state != null &&
+                      globalPoolInfo.state.disputeTokensAddress != null
+                        ? ""
+                        : "(projected)"}
+                    </td>
+                    <td>
+                      {globalPoolInfo.state != null ? (
+                        <span>
+                          <Amount
+                            size={
+                              Web3.utils
+                                .toBN(poolInfo.feeNumerator)
+                                .gt(
+                                  Web3.utils.toBN(
+                                    nullthrows(globalPoolInfo.state)
+                                      .projectedFeeNumerator
+                                  )
+                                )
+                                ? poolInfo.contribution
+                                : Web3.utils
+                                    .toBN(poolInfo.feeNumerator)
+                                    .eq(
+                                      Web3.utils.toBN(
+                                        nullthrows(globalPoolInfo.state)
+                                          .projectedFeeNumerator
+                                      )
+                                    )
+                                  ? Web3.utils
+                                      .toBN(poolInfo.contribution)
+                                      .eq(Web3.utils.toBN(0))
+                                    ? "0"
+                                    : Web3.utils
+                                        .toBN(
+                                          nullthrows(globalPoolInfo.state)
+                                            .projectedBoundaryParticipationNumerator
+                                        )
+                                        .mul(
+                                          Web3.utils.toBN(poolInfo.contribution)
+                                        )
+                                        .div(
+                                          Web3.utils.toBN(
+                                            nullthrows(globalPoolInfo.state)
+                                              .projectedBoundaryParticipationDenominator
+                                          )
+                                        )
+                                        .toString()
+                                  : "0"
+                            }
+                          />{" "}
+                          REP
+                        </span>
+                      ) : (
+                        "loading..."
+                      )}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Actual fee charged{" "}
+                      {globalPoolInfo != null &&
+                      globalPoolInfo.state != null &&
+                      globalPoolInfo.state.disputeTokensAddress != null
+                        ? ""
+                        : "(projected)"}
+                    </td>
+                    <td>
+                      {globalPoolInfo.state != null ? (
+                        <span>
+                          {Number.parseInt(
+                            globalPoolInfo.state.projectedFeeNumerator
+                          ) / 10}
+                          %
+                        </span>
+                      ) : (
+                        "loading..."
+                      )}
                     </td>
                   </tr>
                   <tr>
@@ -184,6 +272,14 @@ export default (connect: any)((state: State, ownProps: *) => {
         : state.personalPoolInfo
             .get(state.network, ImmMap())
             .get(nullthrows(state.personalAddress), ImmMap())
-            .get(poolAddress)
+            .get(poolAddress),
+    globalPoolInfo:
+      state.network == null
+        ? null
+        : state.poolInfo.get(
+            `${state.network}:${ownProps.market}:${ownProps.round}:${
+              ownProps.outcomeIndex == null ? "-1" : ownProps.outcomeIndex
+            }`
+          )
   };
 })(PoolPersonalAccountingCard);
